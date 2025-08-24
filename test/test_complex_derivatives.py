@@ -1,11 +1,10 @@
 import math
-from src.expressions.basic import Variable, Constant
-from src.expressions.conjunction import Sum, Substraction, Product, Division, Negation
+from src.expressions.basic import Variable, Constant, Sum, Subtraction, Product, Division, Negation
 from src.expressions.polynomial import Polynomial
 from src.expressions.power import Power
 from src.expressions.trigonometric import Sin, Cos, Tan
-from src.expressions.hiperbolic import Sinh, Cosh, Tanh
-from src.expressions.logarithm import Logarithm
+from src.expressions.hyperbolic import Sinh, Cosh, Tanh
+from src.expressions.exponential import Logarithm
 from src.test_utils import evaluate_derivative
 
 VALUES = [0.1, 0.5, 1.0, 2.0, 3.0]
@@ -18,7 +17,7 @@ VALUES = [0.1, 0.5, 1.0, 2.0, 3.0]
 def test_sum_product_division():
     x = Variable()
     expr = Division(
-        Product(Sum(x, Constant(2)), Substraction(x, Constant(3))),
+        Product(Sum(x, Constant(2)), Subtraction(x, Constant(3))),
         x
     )
     def expected_derivative(x_val):

@@ -1,14 +1,10 @@
 import math as m
-from .basic import Expresion, Constant
-from .conjunction import Division, Product, Negation
-from .power import Power
+from .basic import Expression, Constant, Division, Product, Negation, Sum
+from .polynomial import Polynomial
 
-class Sin(Expresion):
-    def __init__(self, argument: Expresion):
-        super().__init__(argument)
-    
-    def derivative(self):
-        return Product(Cos(self.argument), self.argument.derivative())
+class Sin(Expression):
+    def __init__(self, argument: Expression):
+        super().__init__(argument, derivative_class=Cos)
     
     def __call__(self, x: float) -> float:
         return m.sin(self.argument(x))
@@ -16,14 +12,9 @@ class Sin(Expresion):
     def __str__(self):
         return f"sin({self.argument})"
 
-class Cos(Expresion):
-    def __init__(self, argument: Expresion):
-        super().__init__(argument)
-    
-    def derivative(self):
-        return Negation(
-            Product(Sin(self.argument), self.argument.derivative())
-        )
+class Cos(Expression):
+    def __init__(self, argument: Expression):
+        super().__init__(argument, derivative_class=lambda x: Negation(Sin(x)))
     
     def __call__(self, x: float) -> float:
         return m.cos(self.argument(x))
@@ -31,15 +22,9 @@ class Cos(Expresion):
     def __str__(self):
         return f"cos({self.argument})"
 
-class Tan(Expresion):
-    def __init__(self, argument: Expresion):
-        super().__init__(argument)
-    
-    def derivative(self):
-        return Division(
-            self.argument.derivative(), 
-            Power(Cos(self.argument), Constant(2))
-        )
+class Tan(Expression):
+    def __init__(self, argument: Expression):
+        super().__init__(argument, lambda arg: Polynomial(Cos(arg), -2))
     
     def __call__(self, x: float) -> float:
         return m.tan(self.argument(x))

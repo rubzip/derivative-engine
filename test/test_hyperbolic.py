@@ -1,6 +1,6 @@
 import math
 from src.expressions.basic import Variable
-from src.expressions.hiperbolic import Sinh, Cosh, Tanh
+from src.expressions.hyperbolic import Sinh, Cosh, Tanh
 from src.test_utils import evaluate_derivative
 
 VALUES = [0.1, 0.5, 1.0, 2.0]

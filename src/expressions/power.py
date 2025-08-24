@@ -1,6 +1,8 @@
-from .basic import Constant
-from .conjunction import Conjunction, Sum, Product, Division
-from .logarithm import Logarithm
+import math as m
+
+from .basic import Expression, Constant, Conjunction, Sum, Product, Division
+from .exponential import Logarithm
+from .polynomial import Polynomial
 
 
 class Power(Conjunction):
@@ -8,14 +10,6 @@ class Power(Conjunction):
         super().__init__(left, right)
     
     def derivative(self):
-        if isinstance(self.right, Constant):
-            return Product(
-                Product(
-                    self.right,
-                    Power(self.left, Constant(self.right.value - 1))
-                ),
-                self.left.derivative()
-            )
         return Product(
             Power(self.left, self.right),
             Sum(
@@ -25,15 +19,18 @@ class Power(Conjunction):
         )
     
     def simplify(self):
-        if isinstance(self.left, Constant) and self.left.value == 1:
-            return Constant(1)
-        if isinstance(self.left, Constant) and self.left.value == 0:
-            return Constant(0)
-        if isinstance(self.right, Constant) and self.right.value == 0:
-            return Constant(1)
-        if isinstance(self.right, Constant) and self.right.value == 1:
-            return self.left.simplify()
-        return Power(self.left.simplify(), self.right.simplify())
+        left = self.left.simplify()
+        right = self.right.simplify()
+
+        if isinstance(right, Constant):
+            if right.value == 0:
+                return Constant(1)
+            if right.value == 1:
+                return left
+            if isinstance(left, Constant):
+                return Constant(left.value ** right.value)
+            return Polynomial(left, right.value)
+        return Power(left, right)
 
     def __call__(self, x: float) -> float:
         return self.left(x) ** self.right(x)

@@ -1,5 +1,4 @@
-from src.expressions.basic import Constant, Variable
-from src.expressions.conjunction import Negation
+from src.expressions.basic import Constant, Variable, Negation
 from src.test_utils import evaluate_derivative
 
 

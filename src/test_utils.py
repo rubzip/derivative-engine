@@ -1,6 +1,6 @@
-from src.expressions.basic import Expresion
+from src.expressions.basic import Expression
 
-def evaluate_derivative(expresion: Expresion, expected_derivative: callable, values: list[float], tol: float = 1e-6):
+def evaluate_derivative(expresion: Expression, expected_derivative: callable, values: list[float], tol: float = 1e-6):
     derivative_exp = expresion.derivative().simplify()
     for x in values:
         actual = derivative_exp(x)

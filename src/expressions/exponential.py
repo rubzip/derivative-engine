@@ -1,9 +1,9 @@
 import math as m
-from .basic import Expresion, Division
+from .basic import Expression, Division
 
 
-class Logarithm(Expresion):
-    def __init__(self, argument: Expresion):
+class Logarithm(Expression):
+    def __init__(self, argument: Expression):
         super().__init__(argument=argument)
     
     def derivative(self) -> Division:
@@ -24,8 +24,8 @@ class Logarithm(Expresion):
     def __str__(self):
         return f"ln({self.argument})"
 
-class Exponential(Expresion):
-    def __init__(self, argument: Expresion):
+class Exponential(Expression):
+    def __init__(self, argument: Expression):
         super().__init__(argument, lambda arg: Exponential(arg))
     
     def simplify(self):
