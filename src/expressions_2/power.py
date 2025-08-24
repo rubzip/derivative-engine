@@ -28,8 +28,8 @@ class Power(Conjunction):
             if right.value == 1:
                 return left
             if isinstance(left, Constant):
-                return Constant(left ** right)
-            return Polynomial(left, right)
+                return Constant(left.value ** right.value)
+            return Polynomial(left, right.value)
         return Power(left, right)
 
     def __call__(self, x: float) -> float:
@@ -37,14 +37,3 @@ class Power(Conjunction):
 
     def __str__(self):
         return f"({self.left} ^ {self.right})"
-
-
-class Exponential(Expresion):
-    def __init__(self, argument: Expresion):
-        super().__init__(argument, lambda arg: Exponential(arg))
-    
-    def __call__(self, x):
-        return m.exp(self.argument(x))
-
-    def __str__(self):
-        return f"exp({self.argument})"    

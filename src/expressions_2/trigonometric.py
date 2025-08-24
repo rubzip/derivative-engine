@@ -1,5 +1,5 @@
 import math as m
-from .basic import Expresion, Constant, Division, Product, Negation
+from .basic import Expresion, Constant, Division, Product, Negation, Sum
 from .polynomial import Polynomial
 
 class Sin(Expresion):
