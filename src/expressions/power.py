@@ -8,16 +8,16 @@ from .polynomial import Polynomial
 class Power(Conjunction):
     def __init__(self, left, right):
         super().__init__(left, right)
-    
+
     def derivative(self):
         return Product(
             Power(self.left, self.right),
             Sum(
                 Product(self.right.derivative(), Logarithm(self.left)),
-                Product(self.right, Division(self.left.derivative(), self.left))
-            )
+                Product(self.right, Division(self.left.derivative(), self.left)),
+            ),
         )
-    
+
     def simplify(self):
         left = self.left.simplify()
         right = self.right.simplify()
@@ -28,7 +28,7 @@ class Power(Conjunction):
             if right.value == 1:
                 return left
             if isinstance(left, Constant):
-                return Constant(left.value ** right.value)
+                return Constant(left.value**right.value)
             return Polynomial(left, right.value)
         return Power(left, right)
 
