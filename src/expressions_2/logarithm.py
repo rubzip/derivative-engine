@@ -16,15 +16,4 @@ class Logarithm(Expresion):
         return m.log(self.argument(x))
     
     def __str__(self):
-        return f"ln ({self.argument})"
-
-
-class Exponential(Expresion):
-    def __init__(self, argument: Expresion):
-        super().__init__(argument, lambda arg: Exponential(arg))
-    
-    def __call__(self, x):
-        return m.exp(self.argument(x))
-
-    def __str__(self):
-        return f"e ^ ({self.argument})"    
+        return f"ln({self.argument})"

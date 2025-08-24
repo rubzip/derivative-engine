@@ -1,4 +1,6 @@
-from .basic import Constant, Conjunction, Sum, Product, Division
+import math as m
+
+from .basic import Expresion, Constant, Conjunction, Sum, Product, Division
 from .logarithm import Logarithm
 from .polynomial import Polynomial
 
@@ -35,3 +37,14 @@ class Power(Conjunction):
 
     def __str__(self):
         return f"({self.left} ^ {self.right})"
+
+
+class Exponential(Expresion):
+    def __init__(self, argument: Expresion):
+        super().__init__(argument, lambda arg: Exponential(arg))
+    
+    def __call__(self, x):
+        return m.exp(self.argument(x))
+
+    def __str__(self):
+        return f"exp({self.argument})"    
