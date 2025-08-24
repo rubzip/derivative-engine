@@ -32,7 +32,7 @@ exit()
 ## ✍️ Examples
 
 Input:
-```bash
+```
 function to derivate: sin ( x)
 cos(x)
 function to derivate: cos(x)
@@ -46,29 +46,29 @@ function to derivate: x^2 + 3*x + 5 + exp(x)
 ## 📚 Supported syntax
 
 * Constants and variable:
-1, 2.5, x
+```1, 2.5, x```
 
 * Basic operators:
-+, -, *, /, ^
+```+, -, *, /, ^```
 
 * Trigonometric functions:
-sin(x), cos(x), tan(x)
+```sin(x), cos(x), tan(x)```
 
 * Hyperbolic functions:
-sinh(x), cosh(x), tanh(x)
+```sinh(x), cosh(x), tanh(x)```
 
 * Exponential and logarithm:
-exp(x), ln(x)
+```exp(x), ln(x)```
 
 ## ⚡ Automatic simplification
 
 The engine applies basic rules such as:
 
-`x + 0 → x`  
-`x - x → 0`  
-`x * 1 → x`  
-`(x ^ 1) → x`  
-`exp(ln(x)) → x`
+ * `x + 0 → x`  
+ * `x - x → 0`  
+ * `x * 1 → x`  
+ * `(x ^ 1) → x`  
+ * `exp(ln(x)) → x`
 
 ## 🧪 Tests
 
