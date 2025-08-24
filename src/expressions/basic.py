@@ -25,6 +25,24 @@ class Expression(ABC):
             return False
         return self.value == value
     
+    def __eq__(self, other: "Expression") -> bool:
+        if type(self) != type(other):
+            return False
+
+        if isinstance(self, Conjunction):
+            return (self.left == other.left) and (self.right == other.right)
+
+        if isinstance(self, Constant):
+            return self.value == other.value
+
+        if isinstance(self, Variable):
+            return True
+
+        if self.argument is not None:
+            return self.argument == other.argument
+
+        return False 
+    
     @abstractmethod
     def __call__(self, x: float) -> float: ...
 
