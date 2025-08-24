@@ -61,7 +61,7 @@ class Negation(Expression):
         super().__init__(argument)
     
     def derivative(self) -> "Negation":
-        return Negation(self.argument.derivative())
+        return Negation(self.argument.derivative()).simplify()
     
     def simplify(self):
         arg = self.argument.simplify()
@@ -69,6 +69,10 @@ class Negation(Expression):
             return arg.argument
         if isinstance(arg, Constant):
             return Constant(-arg.value)
+        if isinstance(arg, Sum):
+            return Sum(Negation(arg.left), Negation(arg.right))
+        if isinstance(arg, Subtraction):
+            return Subtraction(arg.right, arg.left)
         return Negation(arg)
     
     def __call__(self, x: float) -> float:
@@ -164,6 +168,10 @@ class Product(Conjunction):
             return right
         if isinstance(right, Constant) and right.value == 1:
             return left
+        if isinstance(left, Constant) and left.value == -1:
+            return Negation(right)
+        if isinstance(right, Constant) and right.value == -1:
+            return Negation(left)
         return Product(left, right)
     
     def __call__(self, x: float) -> float:
