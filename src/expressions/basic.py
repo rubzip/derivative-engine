@@ -97,7 +97,7 @@ class Negation(Expression):
         return -(self.argument(x))
 
     def __str__(self):
-        return f"-({self.argument})"
+        return f"-({self.argument})" if isinstance(self, Conjunction) else f"-{self.argument}"
 
 
 class Conjunction(Expression):
