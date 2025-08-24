@@ -9,6 +9,8 @@ def main(n_tries: int = 10):
 
         try:
             expr = parse(expr_str)
+            for _ in range(n_tries):
+                expr = expr.simplify()
             derivative = expr.derivative()
             for _ in range(n_tries):
                 derivative = derivative.simplify()

@@ -129,6 +129,8 @@ class Sum(Conjunction):
             return right
         if isinstance(right, Constant) and right.value == 0:
             return left
+        if isinstance(right, Negation):
+            return Subtraction(left, right.argument)
         return Sum(left, right)
 
     def __call__(self, x: float) -> float:
