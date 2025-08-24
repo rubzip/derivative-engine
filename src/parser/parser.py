@@ -3,6 +3,7 @@ from src.expressions import (
     Expression, Constant, Variable, Sum, Subtraction, Product, Division, Power, Negation,
     Sin, Cos, Tan, Sinh, Cosh, Tanh, Exponential, Logarithm
 )
+from .tokenizer import tokenize
 
 FUN_MAP = {
     "sin": Sin,
@@ -150,3 +151,9 @@ class Parser:
         if self.peek() is None:
             return expr
         raise ValueError(f"Parsing error. Parsed function: {''.join(self.tokens[:self.pos])}...")
+
+
+def parse(expr: str) -> Expression:
+    tokens = tokenize(expr=expr)
+    parser = Parser(tokens=tokens)
+    return parser.parse()
