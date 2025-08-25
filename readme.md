@@ -6,8 +6,6 @@ The goal was to think and desing an analitical diferenciation library using obje
 
 It can parse mathematical expressions, simplify them, and compute their symbolic derivatives.
 
-## Parsing System
-
 ## OOP Design
 ### Expression Base Class
 At the core of the engine is the abstract class `Expression`, which acts as the interface for every mathematical function that can be differentiated.
@@ -15,7 +13,7 @@ At the core of the engine is the abstract class `Expression`, which acts as the 
 * Each `Expression` can hold an `argument`, which is itself another `Expression`. This recursive structure allows expressions to be represented as a *tree*.
 For example, the expression `sin(x^2)` is stored as a `Sin` node whose argument is a Power node, which in turn contains a `Variable`.
 
-* Another optional attribute is `derivative_class`, which acts as a **factory function** that instantiates the respective derivative expression.
+* Another optional attribute is `derivative_class`, which acts as a **factory function** that instantiates the respective derivative `Expression`.
 For example, the `Sin` class is defined as:
 ```python
 class Sin(Expression):
@@ -60,13 +58,58 @@ class Conjunction(Expression):
     def simplify(self) -> Expression: ...
 ```
 
-### Tree Structure
-With this object-oriented architecture, any mathematical expression can be represented as a tree:
-* Classes inheriting from `Conjunction` (`Sum`, `Subtraction`, `Product`, `Division`...) form **binary branches**.
+### Binary Tree Structure
+With this object-oriented architecture, any mathematical expression can be represented as a tree (except for non-commutative ternary operators nor higher order operators):
+* Classes inheriting from `Conjunction` (`Sum`, `Subtraction`, `Product`, `Division`, ...) form **binary branches**.
 * Classes inheriting directly from `Expression` with one `argument` (`Sin`, `Cos`, `Exponential`, ...) form **unary branches**.
 * Classes like `Constant` and `Variable` (which do not contain further arguments) form the **leaves**.
 
+### Basic Implementation
+In the file `basic.py`, all the fundamental implementations are defined (in addition to the base classes).
 
+
+We start with `Constant`, which represents a fixed real number inside an expression:
+```python
+class Constant(Expression):
+    def __init__(self, value: float):
+        super().__init__()
+        self.value = value
+
+    def derivative(self) -> "Constant":
+        return Constant(0)
+
+    def __call__(self, x: float) -> float:
+        return self.value
+
+    def __str__(self):
+        return str(self.value)
+```
+Next is `Variable`, which represents the variable `x`. Its derivative is always `1`:
+```python
+class Variable(Expression):
+    def __init__(self):
+        super().__init__()
+
+    def derivative(self) -> Constant:
+        return Constant(1)
+
+    def __call__(self, x: float) -> float:
+        return x
+```
+This file also defines the binary operators `Sum`, `Subtraction`, `Product`, `Division` , which all inherit from the `Conjunction` base class. Each of them overrides the `derivative()` method with the corresponding differentiation rule. For example, `Sum` is implemented as:
+```python
+class Sum(Conjunction):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+    def derivative(self) -> "Sum":
+        return Sum(left=self.left.derivative(), right=self.right.derivative())
+
+    def __call__(self, x: float) -> float:
+        return self.left(x) + self.right(x)
+```
+
+## Parsing System
 
 
 

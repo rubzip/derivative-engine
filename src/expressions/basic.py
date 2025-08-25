@@ -104,10 +104,12 @@ class Conjunction(Expression):
     def __init__(self, left: Expression, right: Expression):
         self.left = left
         self.right = right
+    
+    @abstractmethod
+    def derivative(self) -> Expression: ...
 
     @abstractmethod
-    def simplify(self):
-        pass
+    def simplify(self) -> Expression: ...
 
 
 class Sum(Conjunction):
@@ -137,7 +139,7 @@ class Sum(Conjunction):
         return self.left(x) + self.right(x)
 
     def __str__(self):
-        return f"{self.left} + {self.right}"
+        return f"({self.left} + {self.right})"
 
 
 class Subtraction(Conjunction):
@@ -165,7 +167,7 @@ class Subtraction(Conjunction):
         return self.left(x) - self.right(x)
 
     def __str__(self):
-        return f"{self.left} - {self.right}"
+        return f"({self.left} - {self.right})"
 
 
 class Product(Conjunction):
@@ -202,7 +204,7 @@ class Product(Conjunction):
         return self.left(x) * self.right(x)
 
     def __str__(self):
-        return f"{self.left} * {self.right}"
+        return f"({self.left} * {self.right})"
 
 
 class Division(Conjunction):
@@ -239,4 +241,4 @@ class Division(Conjunction):
         return self.left(x) / self.right(x)
 
     def __str__(self):
-        return f"{self.left} / {self.right}"
+        return f"({self.left} / {self.right})"
