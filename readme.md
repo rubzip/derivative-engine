@@ -106,8 +106,67 @@ class Sum(Conjunction):
 ```
 
 ## Parsing System
+The parsing system, consist of two main components:
+1. A **Tokenizer**, which takes a ```str``` expression and splits it into a list of tokens.
+2. A **Parser**, whichbuilds an **Abstract Syntax Tree (AST)** based on the tokens, following operator precedence rules.
 
+### Tokenizer
+Basically the tokenizer removes any space and split any string into 4 different groups:
+ + **Integers** `r"\d+"`
+ + **Float numbers** `r\d+\.\d*|\.\d+`
+ + **Text identifiers** `r"[a-zA-Z]+"`
+ + **Special symbols** `r"[()+\-*/^]"`
 
+```pyhton
+TOKEN_REGEX = r"\d+\.\d*|\.\d+|\d+|[a-zA-Z]+|[()+\-*/^]"
+
+def tokenize(expr: str) -> list:
+    return re.findall(TOKEN_REGEX, expr.replace(" ", "").lower())
+```
+### Parser
+The parser reads the list of tokens from *left to right* and keeping track of its position (self.pos).
+ * `peek()` → returns the current token without advancing.
+ * `consume()` → returns the current token and advances the pointer. Also exitst the possibility of adding an expected argument, if the returned argument is not the same as the expected raises an error.
+
+```python
+class Parser:
+    def __init__(self, tokens: list[str]):
+        self.tokens = tokens
+        self.pos = 0
+        self.len = len(tokens)
+
+    def peek(self) -> str | None:
+        """Checks the current token (but doesnt update status)"""
+        return self.tokens[self.pos] if self.pos < self.len else None
+
+    def consume(self, expected: str=None) -> str:
+        """Returns the current token (and updates status)"""
+        token = self.peek()
+        if token is None:
+            raise ValueError("Unexpected end of input")
+        if expected and token != expected:
+            raise ValueError(f"Expected: {expected}, got: {token}")
+        self.pos += 1
+        return token
+```
+### Operator Precedence
+When parsing mathematical expressions, operator precedence determines the order in which operations are grouped.
+The parser follows **recursive descent parsing**, where each level corresponds to a precedence rule:
+
+1. Base (`parse_base`)
+ * Handles constants, variables, functions, negation, and parentheses.
+ * Examples: `3`, `x`, `sin(x)`, `-x`, `(x+1)`
+2. Factor (`parse_factor`)
+ * Handles exponentiation, which is right-associative.
+ * Example: `a^b^c` is parsed as `a^(b^c)`.
+3. Multiplication/Division (`parse_mult_div`)
+ * Handles `*` and `/` operators, left to right.
+ * Example: `a * b / c`.
+4. Expression (`parse_expr`)
+ * Handles addition and subtraction (`+`, `-`), left to right.
+ * Example: `a + b - c`.
+
+From highest level to the lowest level
 
 ## 🚀 Installation
 

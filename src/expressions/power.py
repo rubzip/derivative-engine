@@ -7,7 +7,7 @@ from .polynomial import Polynomial
 
 class Power(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right)
+        super().__init__(left, right, order=2)
 
     def derivative(self):
         return Product(

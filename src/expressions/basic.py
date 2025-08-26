@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 
 
 class Expression(ABC):
-    def __init__(self, argument: "Expression" = None, derivative_class=None):
+    def __init__(self, argument: "Expression" = None, derivative_class=None, order: int = 0):
         self.argument = argument
         self.derivative_class = derivative_class
+        self.order = order
 
     def derivative(self) -> "Expression":
         """Chain rule"""
@@ -19,12 +20,13 @@ class Expression(ABC):
         return self.__class__(self.argument.simplify())
 
     def equals(self, value: float):
+        """Check if expression is a constant with given value"""
         if not isinstance(self, Constant):
             return False
         return self.value == value
 
-    def __eq__(self, other: "Expression") -> bool:
-        if type(self) != type(other):
+    def __eq__(self, other: "Expression") -> bool: 
+        if type(self) != type(other): # This is a simplification, may not work in some cases
             return False
 
         if isinstance(self, Conjunction):
@@ -47,7 +49,7 @@ class Expression(ABC):
 
 class Constant(Expression):
     def __init__(self, value: float):
-        super().__init__()
+        super().__init__(order=0)
         self.value = value
 
     def derivative(self) -> "Constant":
@@ -62,7 +64,7 @@ class Constant(Expression):
 
 class Variable(Expression):
     def __init__(self):
-        super().__init__()
+        super().__init__(order=0)
 
     def derivative(self) -> Constant:
         return Constant(1)
@@ -76,7 +78,7 @@ class Variable(Expression):
 
 class Negation(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument)
+        super().__init__(argument, order=0)
 
     def derivative(self) -> "Negation":
         return Negation(self.argument.derivative()).simplify()
@@ -101,9 +103,10 @@ class Negation(Expression):
 
 
 class Conjunction(Expression):
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression, order: int):
         self.left = left
         self.right = right
+        self.order = order
     
     @abstractmethod
     def derivative(self) -> Expression: ...
@@ -114,7 +117,7 @@ class Conjunction(Expression):
 
 class Sum(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right)
+        super().__init__(left, right, order=3)
 
     def derivative(self) -> "Sum":
         return Sum(left=self.left.derivative(), right=self.right.derivative())
@@ -144,7 +147,7 @@ class Sum(Conjunction):
 
 class Subtraction(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right)
+        super().__init__(left, right, order=3)
 
     def derivative(self) -> "Subtraction":
         return Subtraction(left=self.left.derivative(), right=self.right.derivative())
@@ -172,7 +175,7 @@ class Subtraction(Conjunction):
 
 class Product(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right)
+        super().__init__(left, right, order=2)
 
     def derivative(self) -> Sum:
         return Sum(
@@ -212,7 +215,7 @@ class Division(Conjunction):
         if isinstance(right, Constant) and right.value == 0:
             raise ZeroDivisionError(f"Zero division error: {left} / {right}")
 
-        super().__init__(left, right)
+        super().__init__(left, right, order=3)
 
     def derivative(self) -> "Division":
         return Division(

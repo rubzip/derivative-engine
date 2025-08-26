@@ -69,7 +69,7 @@ class Parser:
         """Checks the current token (but doesnt update status)"""
         return self.tokens[self.pos] if self.pos < self.len else None
 
-    def consume(self, expected=None) -> str:
+    def consume(self, expected: str=None) -> str:
         """Returns the current token (and updates status)"""
         token = self.peek()
         if token is None:
@@ -81,40 +81,35 @@ class Parser:
 
     def parse_base(self) -> Expression:
         """Parse the deepest-level elements: constants, variables, functions, negation, parentheses."""
-        token = self.peek()
+        token = self.consume()
 
         if token is None:
             raise ValueError("Unexpected end of input while parsing base.")
 
         # Negation
         if token == "-":
-            self.consume()
             return Negation(self.parse_factor())
 
         # Parentheses
         if token == "(":
-            self.consume()
             expr = self.parse_expr()
             self.consume(")")
             return expr
 
         # Number: integer or float
         if self._is_int(token):
-            self.consume()
             return Constant(int(token))
+
         if self._is_float(token):
-            self.consume()
             return Constant(float(token))
 
         # Variable
         if token == "x":
-            self.consume()
             return Variable()
 
         # Function call
         func_class = self.get_function(token)
         if func_class:
-            self.consume()  # consume function name
             self.consume("(")  # expect '('
             arg = self.parse_expr()
             self.consume(")")  # expect ')'
@@ -140,12 +135,8 @@ class Parser:
         while self.peek() in {"*", "/"}:
             operator = self.consume()
             right = self.parse_factor()
-            if operator == "*":
-                expr = Product(expr, right)
-            elif operator == "/":
-                expr = Division(expr, right)
-            else:
-                raise ValueError(f"Unknown operator: {operator}")
+            expr_class = Sum if operator == "+" else Subtraction
+            expr = expr_class(expr, right)
         return expr
 
     def parse_expr(self) -> Expression:
@@ -153,12 +144,8 @@ class Parser:
         while self.peek() in {"+", "-"}:
             operator = self.consume()
             right = self.parse_mult_div()
-            if operator == "+":
-                expr = Sum(expr, right)
-            elif operator == "-":
-                expr = Subtraction(expr, right)
-            else:
-                raise ValueError(f"Unknown operator: {operator}")
+            expr_class = Sum if operator == "+" else Subtraction
+            expr = expr_class(expr, right)
         return expr
 
     def parse(self) -> Expression:
