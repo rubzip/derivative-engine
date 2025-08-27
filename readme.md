@@ -21,18 +21,21 @@ class Sin(Expression):
         super().__init__(argument, derivative_class=lambda arg: Cos(arg))
 ```
 
-* Defined methods are:
-  * `derivative()` → Computes the symbolic derivative of the expression (using the chain rule by default). In some specific cases is overiden (Constant or Variable), in the rest of cases use chain rule
-```python
-def derivative(self) -> Expression:
-    return Product(
-        self.argument.derivative(),
-        self.derivative_class(self.argument)
-    )
-```
-  * `simplify()` → Applies algebraic simplifications to reduce redundant terms.
-  * `__call__(x)` → Evaluates the expression numerically at a given value of `x`.
-  * `__str__()` → Returns a human-readable string representation of the expression.
+Defined methods are:
+* `derivative()` → Computes the symbolic derivative of the expression (using the chain rule by default). In some specific cases is overiden (Constant or Variable), in the rest of cases use chain rule:
+$$
+\frac{d}{dx} f(g(x)) = f'(g(x)) \cdot g'(x)
+$$
+    ```python
+    def derivative(self) -> Expression:
+        return Product(
+            self.argument.derivative(),
+            self.derivative_class(self.argument)
+        )
+    ```
+* `simplify()` → Applies algebraic simplifications to reduce redundant terms.
+* `__call__(x)` → Evaluates the expression numerically at a given value of `x`.
+* `__str__()` → Returns a human-readable string representation of the expression.
 
 This design makes it easy to extend the system with new functions (trigonometric, hyperbolic, exponential, etc.) by subclassing `Expression` and defining their derivative and simplification rules.
 
