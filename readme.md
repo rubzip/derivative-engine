@@ -60,7 +60,7 @@ With this object-oriented architecture, any mathematical expression can be repre
 * Classes inheriting directly from `Expression` with one `argument` (`Sin`, `Cos`, `Exponential`, ...) form **unary branches**.
 * Classes like `Constant` and `Variable` (which do not contain further arguments) form the **leaves**.
 
-### Basic Implementation
+### Base Implementation
 In the file `basic.py`, all the fundamental implementations are defined (in addition to the base classes).
 
 
@@ -153,21 +153,116 @@ class Parser:
 When parsing mathematical expressions, operator precedence determines the order in which operations are grouped.
 The parser follows **recursive descent parsing**, where each level corresponds to a precedence rule:
 
-1. Base (`parse_base`)
- * Handles constants, variables, functions, negation, and parentheses.
- * Examples: `3`, `x`, `sin(x)`, `-x`, `(x+1)`
-2. Factor (`parse_factor`)
- * Handles exponentiation, which is right-associative.
- * Example: `a^b^c` is parsed as `a^(b^c)`.
-3. Multiplication/Division (`parse_mult_div`)
- * Handles `*` and `/` operators, left to right.
- * Example: `a * b / c`.
-4. Expression (`parse_expr`)
- * Handles addition and subtraction (`+`, `-`), left to right.
- * Example: `a + b - c`.
+1. **Base** (`parse_base`)
+    * Handles constants, variables, functions, negation, and parentheses.
+    * Examples: `3`, `x`, `sin(x)`, `-x`, `(x+1)`
+2. **Factor** (`parse_factor`)
+    * Handles exponentiation, which is right-associative.
+    * Example: `a^b^c` is parsed as `a^(b^c)`.
+3. **Multiplication/Division** (`parse_mult_div`)
+    * Handles `*` and `/` operators, left to right.
+    * Example: `a * b / c`.
+4. **Expression** (`parse_expr`)
+    * Handles addition and subtraction (`+`, `-`), left to right.
+    * Example: `a + b - c`.
 
-From highest level to the lowest level
+From highest level to the lowest level:
+### Orchestator function
+This function creates a `Parser` instance and calls the `parse()` method. 
+```python
+def parse(expr: str) -> Expression:
+    tokens = tokenize(expr=expr)
+    parser = Parser(tokens=tokens)
+    return parser.parse()
+```
+The `parse()` method orchestrates the full parsing process.
+```python
+class Parser:
+    def parse(self) -> Expression:
+        self.pos = 0
+        expr = self.parse_expr()
+        if self.peek() is None:
+            return expr
+        raise ValueError(
+            f"Parsing error. Parsed function: {''.join(self.tokens[:self.pos])}..."
+        )
+```
+### Parse Expression
+This method calls the lower-precedence parser method (`parse_mult_div`) and combines results using `Sum` and `Subtraction`.
+```python
+class Parser:
+    def parse_expr(self) -> Expression:
+        expr = self.parse_mult_div()
+        while self.peek() in {"+", "-"}:
+            operator = self.consume()
+            right = self.parse_mult_div()
+            expr_class = Sum if operator == "+" else Subtraction
+            expr = expr_class(expr, right)
+        return expr
+``` 
+### Parse Multiplication and Division
+Similar to `parse_expr` but with higher precedence.
+```python
+class Parser:
+    def parse_mult_div(self) -> Expression:
+        expr = self.parse_factor()
+        while self.peek() in {"*", "/"}:
+            operator = self.consume()
+            right = self.parse_factor()
+            expr_class = Product if operator == "*" else Division
+            expr = expr_class(expr, right)
+        return expr
+``` 
+### Parse Factor
+This method handles **exponentiation**, which is **right-associative**.
+That means ``a ^ b ^ c ^ d`` is parsed as: `a ^ (b ^ (c ^ d))`.
 
+```python
+class Parser:
+    def parse_factor(self) -> Expression:
+        base = self.parse_base()
+        if self.peek() == "^":
+            self.consume()
+            factor = self.parse_factor()
+            return Power(base, factor)
+        return base
+```
+### Parse Base
+This is the **lowest level** of the parser. It consumes a single token and decides what to build:
+```python
+class Parser:
+    def parse_base(self) -> Expression:
+        token = self.consume()
+
+        if token is None:
+            raise ValueError("Unexpected end of input while parsing base.")
+
+        if token == "-":
+            return Negation(self.parse_factor())
+
+        if token == "(":
+            expr = self.parse_expr()
+            self.consume(")")
+            return expr
+
+        if self._is_int(token):
+            return Constant(int(token))
+
+        if self._is_float(token):
+            return Constant(float(token))
+
+        if token == "x":
+            return Variable()
+
+        func_class = self.get_function(token)
+        if func_class:
+            self.consume("(")  # expect '('
+            arg = self.parse_expr()
+            self.consume(")")  # expect ')'
+            return func_class(arg)
+
+        raise ValueError(f"Unknown token: {token}")
+```
 ## 🚀 Installation
 
 Clone the repository and move into the project folder:

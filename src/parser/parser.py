@@ -69,7 +69,7 @@ class Parser:
         """Checks the current token (but doesnt update status)"""
         return self.tokens[self.pos] if self.pos < self.len else None
 
-    def consume(self, expected: str=None) -> str:
+    def consume(self, expected: str=None) -> str | None:
         """Returns the current token (and updates status)"""
         token = self.peek()
         if token is None:
@@ -135,7 +135,7 @@ class Parser:
         while self.peek() in {"*", "/"}:
             operator = self.consume()
             right = self.parse_factor()
-            expr_class = Sum if operator == "+" else Subtraction
+            expr_class = Product if operator == "*" else Division
             expr = expr_class(expr, right)
         return expr
 
