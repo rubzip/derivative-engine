@@ -41,7 +41,7 @@ This design makes it easy to extend the system with new functions (trigonometric
 
 ### Conjunction Base Class
 `Conjunction` is another base class that inhereits from `Expression`.
-While a plain `Expression` has a single argument (or ``None``), a Conjunction holds two sub-expressions: `left` and `right`.
+While a plain `Expression` has a single argument (or ``None``), a ``Conjunction`` holds two sub-expressions: `left` and `right`.
 
 It is defined for binary operators such as **addition**, **subtraction**, **multiplication**, **division**, **power**...
 ```python

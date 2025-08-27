@@ -6,7 +6,11 @@ class Polynomial(Expression):
         def polynomial_derivative(arg: Expression) -> Expression:
             return Product(Constant(degree), Polynomial(arg, degree - 1))
 
-        super().__init__(argument=argument, derivative_class=polynomial_derivative)
+        super().__init__(
+            argument=argument,
+            derivative_class=polynomial_derivative,
+            precedence_order=2,
+        )
         self.degree = degree
 
     def simplify(self):
@@ -23,4 +27,5 @@ class Polynomial(Expression):
         return self.argument(x) ** self.degree
 
     def __str__(self):
-        return f"({self.argument} ^ {self.degree})"
+        base_str = self._add_parentheses(self.argument)
+        return f"{base_str} ^ {self.degree}"

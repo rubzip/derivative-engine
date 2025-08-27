@@ -108,7 +108,7 @@ class Negation(Expression):
 
     def __str__(self):
         argument_str = self._add_parentheses(self.argument)
-        return f"-{argument_str})"
+        return f"-{argument_str}"
 
 
 class Conjunction(Expression):
@@ -151,6 +151,8 @@ class Sum(Conjunction):
             return left
         if isinstance(right, Negation):
             return Subtraction(left, right.argument)
+        if left == right:
+            return Product(Constant(2), left)
         return Sum(left, right)
 
     def __call__(self, x: float) -> float:
@@ -192,7 +194,7 @@ class Product(Conjunction):
             Product(left=self.left, right=self.right.derivative()),
         )
 
-    def simplify(self):
+    def simplify(self): # Refactor this method (and others simplify). Probably adding properties as distributive, associative, neutral element...
         left = self.left.simplify()
         right = self.right.simplify()
 
@@ -210,6 +212,12 @@ class Product(Conjunction):
             return Negation(right)
         if isinstance(right, Constant) and right.value == -1:
             return Negation(left)
+        if isinstance(left, Negation) and isinstance(right, Negation):
+            return Product(left.argument, right.argument)
+        if isinstance(left, Negation):
+            return Negation(Product(left.argument, right))
+        if isinstance(right, Negation):
+            return Negation(Product(left, right.argument))
         return Product(left, right)
 
     def __call__(self, x: float) -> float:
