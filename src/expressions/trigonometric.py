@@ -5,7 +5,7 @@ from .polynomial import Polynomial
 
 class Sin(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, derivative_class=Cos)
+        super().__init__(argument, derivative_class=Cos, fn_str="sin")
 
     def __call__(self, x: float) -> float:
         return m.sin(self.argument(x))
@@ -16,7 +16,7 @@ class Sin(Expression):
 
 class Cos(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, derivative_class=lambda x: Negation(Sin(x)))
+        super().__init__(argument, derivative_class=lambda x: Negation(Sin(x)), fn_str="cos")
 
     def __call__(self, x: float) -> float:
         return m.cos(self.argument(x))
@@ -27,7 +27,7 @@ class Cos(Expression):
 
 class Tan(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, lambda arg: Polynomial(Cos(arg), -2))
+        super().__init__(argument, lambda arg: Polynomial(Cos(arg), -2), fn_str="tan")
 
     def __call__(self, x: float) -> float:
         return m.tan(self.argument(x))

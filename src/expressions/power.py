@@ -7,9 +7,9 @@ from .polynomial import Polynomial
 
 class Power(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right, order=2)
+        super().__init__(left, right, precedence_order=2, op_symbol='^')
 
-    def derivative(self):
+    def derivative(self) -> Expression:
         return Product(
             Power(self.left, self.right),
             Sum(
@@ -18,7 +18,7 @@ class Power(Conjunction):
             ),
         )
 
-    def simplify(self):
+    def simplify(self) -> Expression:
         left = self.left.simplify()
         right = self.right.simplify()
 
@@ -36,4 +36,9 @@ class Power(Conjunction):
         return self.left(x) ** self.right(x)
 
     def __str__(self):
-        return f"({self.left} ^ {self.right})"
+        base_str = self._add_parentheses(self.left)
+        if isinstance(self.right, Power):
+            exponent_str = f"({self.right})"
+        else:
+            exponent_str = self._add_parentheses(self.right)
+        return f"{base_str} ^ {exponent_str}"

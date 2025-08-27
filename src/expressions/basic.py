@@ -2,10 +2,11 @@ from abc import ABC, abstractmethod
 
 
 class Expression(ABC):
-    def __init__(self, argument: "Expression" = None, derivative_class=None, order: int = 0):
+    def __init__(self, argument: "Expression" = None, derivative_class=None, precedence_order: int = 1, fn_str: str = None):
         self.argument = argument
         self.derivative_class = derivative_class
-        self.order = order
+        self.precedence_order = precedence_order
+        self.fn_str = fn_str
 
     def derivative(self) -> "Expression":
         """Chain rule"""
@@ -46,10 +47,17 @@ class Expression(ABC):
     @abstractmethod
     def __call__(self, x: float) -> float: ...
 
+    def _add_parentheses(self, child: "Expression") -> str:
+        if child.precedence_order > self.precedence_order:
+            return f"({child})"
+        return str(child)
+    
+    def __str__(self):
+        return f"{self.fn_str}({self.argument})"
 
 class Constant(Expression):
     def __init__(self, value: float):
-        super().__init__(order=0)
+        super().__init__(precedence_order=0)
         self.value = value
 
     def derivative(self) -> "Constant":
@@ -64,7 +72,7 @@ class Constant(Expression):
 
 class Variable(Expression):
     def __init__(self):
-        super().__init__(order=0)
+        super().__init__(precedence_order=0)
 
     def derivative(self) -> Constant:
         return Constant(1)
@@ -78,7 +86,7 @@ class Variable(Expression):
 
 class Negation(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, order=0)
+        super().__init__(argument, precedence_order=1)
 
     def derivative(self) -> "Negation":
         return Negation(self.argument.derivative()).simplify()
@@ -99,14 +107,16 @@ class Negation(Expression):
         return -(self.argument(x))
 
     def __str__(self):
-        return f"-({self.argument})" if isinstance(self.argument, Conjunction) else f"-{self.argument}"
+        argument_str = self._add_parentheses(self.argument)
+        return f"-{argument_str})"
 
 
 class Conjunction(Expression):
-    def __init__(self, left: Expression, right: Expression, order: int):
+    def __init__(self, left: Expression, right: Expression, precedence_order: int, op_symbol: str = None):
         self.left = left
         self.right = right
-        self.order = order
+        self.precedence_order = precedence_order
+        self.op_symbol = op_symbol
     
     @abstractmethod
     def derivative(self) -> Expression: ...
@@ -114,10 +124,15 @@ class Conjunction(Expression):
     @abstractmethod
     def simplify(self) -> Expression: ...
 
+    def __str__(self):
+        left_str = self._add_parentheses(self.left)
+        right_str = self._add_parentheses(self.right)
+        return f"{left_str} {self.op_symbol} {right_str}"
+
 
 class Sum(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right, order=3)
+        super().__init__(left, right, precedence_order=4, op_symbol='+')
 
     def derivative(self) -> "Sum":
         return Sum(left=self.left.derivative(), right=self.right.derivative())
@@ -141,13 +156,10 @@ class Sum(Conjunction):
     def __call__(self, x: float) -> float:
         return self.left(x) + self.right(x)
 
-    def __str__(self):
-        return f"({self.left} + {self.right})"
-
 
 class Subtraction(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right, order=3)
+        super().__init__(left, right, precedence_order=4, op_symbol='-')
 
     def derivative(self) -> "Subtraction":
         return Subtraction(left=self.left.derivative(), right=self.right.derivative())
@@ -169,13 +181,10 @@ class Subtraction(Conjunction):
     def __call__(self, x: float) -> float:
         return self.left(x) - self.right(x)
 
-    def __str__(self):
-        return f"({self.left} - {self.right})"
-
 
 class Product(Conjunction):
     def __init__(self, left, right):
-        super().__init__(left, right, order=2)
+        super().__init__(left, right, precedence_order=3, op_symbol='*')
 
     def derivative(self) -> Sum:
         return Sum(
@@ -206,16 +215,13 @@ class Product(Conjunction):
     def __call__(self, x: float) -> float:
         return self.left(x) * self.right(x)
 
-    def __str__(self):
-        return f"({self.left} * {self.right})"
-
 
 class Division(Conjunction):
     def __init__(self, left, right):
         if isinstance(right, Constant) and right.value == 0:
             raise ZeroDivisionError(f"Zero division error: {left} / {right}")
 
-        super().__init__(left, right, order=3)
+        super().__init__(left, right, precedence_order=3, op_symbol='/')
 
     def derivative(self) -> "Division":
         return Division(
@@ -242,6 +248,3 @@ class Division(Conjunction):
 
     def __call__(self, x: float) -> float:
         return self.left(x) / self.right(x)
-
-    def __str__(self):
-        return f"({self.left} / {self.right})"

@@ -5,32 +5,23 @@ from .polynomial import Polynomial
 
 class Sinh(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, derivative_class=Cosh)
+        super().__init__(argument, derivative_class=Cosh, fn_str="sinh")
 
     def __call__(self, x: float) -> float:
         return m.sinh(self.argument(x))
 
-    def __str__(self):
-        return f"sinh({self.argument})"
-
 
 class Cosh(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, derivative_class=lambda x: Sinh(x))
+        super().__init__(argument, derivative_class=Sinh, fn_str="cosh")
 
     def __call__(self, x: float) -> float:
         return m.cosh(self.argument(x))
 
-    def __str__(self):
-        return f"cosh({self.argument})"
-
 
 class Tanh(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, lambda arg: Polynomial(Cosh(arg), -2))
+        super().__init__(argument, lambda arg: Polynomial(Cosh(arg), -2), fn_str="tanh")
 
     def __call__(self, x: float) -> float:
         return m.tanh(self.argument(x))
-
-    def __str__(self):
-        return f"tanh({self.argument})"
