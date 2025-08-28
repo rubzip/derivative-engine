@@ -2,15 +2,15 @@ from abc import ABC, abstractmethod
 
 
 class Expression(ABC):
-    def __init__(self, argument: "Expression" = None, derivative_class=None, precedence_order: int = 1, fn_str: str = None):
+    def __init__(self, argument: "Expression" = None, derivative_fn: callable = None, precedence_order: int = 1, fn_str: str = None):
         self.argument = argument
-        self.derivative_class = derivative_class
+        self.derivative_fn = derivative_fn
         self.precedence_order = precedence_order
         self.fn_str = fn_str
 
     def derivative(self) -> "Expression":
         """Chain rule"""
-        return Product(self.argument.derivative(), self.derivative_class(self.argument))
+        return Product(self.argument.derivative(), self.derivative_fn(self.argument))
 
     def simplify(self) -> "Expression":
         """Method for simplifying expresion, should be overwritten in some expressions"""

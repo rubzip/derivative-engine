@@ -8,7 +8,7 @@ class Polynomial(Expression):
 
         super().__init__(
             argument=argument,
-            derivative_class=polynomial_derivative,
+            derivative_fn=polynomial_derivative,
             precedence_order=2,
         )
         self.degree = degree

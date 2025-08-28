@@ -5,7 +5,7 @@ from .polynomial import Polynomial
 
 class Sinh(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, derivative_class=Cosh, fn_str="sinh")
+        super().__init__(argument, derivative_fn=Cosh, fn_str="sinh")
 
     def __call__(self, x: float) -> float:
         return m.sinh(self.argument(x))
@@ -13,7 +13,7 @@ class Sinh(Expression):
 
 class Cosh(Expression):
     def __init__(self, argument: Expression):
-        super().__init__(argument, derivative_class=Sinh, fn_str="cosh")
+        super().__init__(argument, derivative_fn=Sinh, fn_str="cosh")
 
     def __call__(self, x: float) -> float:
         return m.cosh(self.argument(x))
