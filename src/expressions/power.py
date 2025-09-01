@@ -1,6 +1,6 @@
 import math as m
 
-from .basic import Expression, Constant, Conjunction, Sum, Product, Division
+from .core import Expression, Constant, Conjunction, Sum, Product, Division
 from .exponential import Logarithm
 from .polynomial import Polynomial
 

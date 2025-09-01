@@ -1,11 +1,11 @@
 import math as m
-from .basic import Expression, Constant, Division, Product, Negation, Sum
+from .core import Expression, Function, Constant, Division, Product, Negation, Sum
 from .polynomial import Polynomial
 
 
-class Sin(Expression):
-    def __init__(self, argument: Expression):
-        super().__init__(argument, derivative_fn=Cos, fn_str="sin")
+class Sin(Function):
+    def __init__(self, argument: Expression, quantity: float = 1.):
+        super().__init__(argument, derivative_fn=Cos, fn_str="sin", is_inverse=lambda x: isinstance(x, Asin))
 
     def __call__(self, x: float) -> float:
         return m.sin(self.argument(x))
@@ -14,8 +14,8 @@ class Sin(Expression):
         return f"sin({self.argument})"
 
 
-class Cos(Expression):
-    def __init__(self, argument: Expression):
+class Cos(Function):
+    def __init__(self, argument: Expression, quantity: float = 1.):
         super().__init__(argument, derivative_fn=lambda x: Negation(Sin(x)), fn_str="cos")
 
     def __call__(self, x: float) -> float:
@@ -25,8 +25,8 @@ class Cos(Expression):
         return f"cos({self.argument})"
 
 
-class Tan(Expression):
-    def __init__(self, argument: Expression):
+class Tan(Function):
+    def __init__(self, argument: Expression, quantity: float = 1.):
         super().__init__(argument, lambda arg: Polynomial(Cos(arg), -2), fn_str="tan")
 
     def __call__(self, x: float) -> float:
@@ -34,3 +34,7 @@ class Tan(Expression):
 
     def __str__(self):
         return f"tan({self.argument})"
+
+class Acos(Function):
+    def __init__(self, argument, quantity):
+        super().__init__(quantity, argument, derivative_fn, is_inverse, symbol='acos', _is_linear)

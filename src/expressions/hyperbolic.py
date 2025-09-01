@@ -1,9 +1,9 @@
 import math as m
-from .basic import Expression, Product, Negation
+from .core import Expression, Function, Product, Negation
 from .polynomial import Polynomial
 
 
-class Sinh(Expression):
+class Sinh(Function):
     def __init__(self, argument: Expression):
         super().__init__(argument, derivative_fn=Cosh, fn_str="sinh")
 
@@ -11,7 +11,7 @@ class Sinh(Expression):
         return m.sinh(self.argument(x))
 
 
-class Cosh(Expression):
+class Cosh(Function):
     def __init__(self, argument: Expression):
         super().__init__(argument, derivative_fn=Sinh, fn_str="cosh")
 
@@ -19,7 +19,7 @@ class Cosh(Expression):
         return m.cosh(self.argument(x))
 
 
-class Tanh(Expression):
+class Tanh(Function):
     def __init__(self, argument: Expression):
         super().__init__(argument, lambda arg: Polynomial(Cosh(arg), -2), fn_str="tanh")
 
