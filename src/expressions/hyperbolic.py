@@ -1,6 +1,5 @@
 import math as m
 from .core import Expression, Function, Constant, Power, Sum, Product
-from .polynomial import Polynomial
 
 
 class Sinh(Function):

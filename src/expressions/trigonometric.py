@@ -1,6 +1,5 @@
 import math as m
 from .core import Expression, Function, Constant, Power, Sum, Product
-from .polynomial import Polynomial
 
 
 class Sin(Function):
@@ -22,7 +21,7 @@ class Cos(Function):
         return m.cos(self.argument(x))
 
 class Tan(Function):
-    derivate_fn = lambda arg: Power(Cos(arg), Constant(-2))
+    derivate_fn = lambda arg: Sum(Constant(1), Power(Tan(arg), Constant(2)))
     is_inverse = lambda x: isinstance(x, Atan)
     symbol = "tan"
     _is_linear: bool = False
