@@ -1,40 +1,58 @@
 import math as m
-from .core import Expression, Function, Constant, Division, Product, Negation, Sum
+from .core import Expression, Function, Constant, Power, Sum, Product
 from .polynomial import Polynomial
 
 
 class Sin(Function):
-    def __init__(self, argument: Expression, quantity: float = 1.):
-        super().__init__(argument, derivative_fn=Cos, fn_str="sin", is_inverse=lambda x: isinstance(x, Asin))
+    derivate_fn = lambda arg: Cos(arg)
+    is_inverse = lambda x: isinstance(x, Asin)
+    symbol = "sin"
+    _is_linear: bool = False
 
-    def __call__(self, x: float) -> float:
+    def __call__(self, x):
         return m.sin(self.argument(x))
 
-    def __str__(self):
-        return f"sin({self.argument})"
-
-
 class Cos(Function):
-    def __init__(self, argument: Expression, quantity: float = 1.):
-        super().__init__(argument, derivative_fn=lambda x: Negation(Sin(x)), fn_str="cos")
+    derivate_fn = lambda arg: Product(Constant(-1), Sin(arg))
+    is_inverse = lambda x: isinstance(x, Acos)
+    symbol = "cos"
+    _is_linear: bool = False
 
-    def __call__(self, x: float) -> float:
+    def __call__(self, x):
         return m.cos(self.argument(x))
 
-    def __str__(self):
-        return f"cos({self.argument})"
-
-
 class Tan(Function):
-    def __init__(self, argument: Expression, quantity: float = 1.):
-        super().__init__(argument, lambda arg: Polynomial(Cos(arg), -2), fn_str="tan")
+    derivate_fn = lambda arg: Power(Cos(arg), Constant(-2))
+    is_inverse = lambda x: isinstance(x, Atan)
+    symbol = "tan"
+    _is_linear: bool = False
 
-    def __call__(self, x: float) -> float:
+    def __call__(self, x):
         return m.tan(self.argument(x))
 
-    def __str__(self):
-        return f"tan({self.argument})"
+class Asin(Function):
+    derivate_fn = lambda arg: Power(Sum(Constant(1), Product(Constant(-1), Power(arg, Constant(2)))), Constant(-0.5))
+    is_inverse = lambda x: isinstance(x, Sin)
+    symbol = "asin"
+    _is_linear: bool = False
+
+    def __call__(self, x):
+        return m.asin(self.argument(x))
 
 class Acos(Function):
-    def __init__(self, argument, quantity):
-        super().__init__(quantity, argument, derivative_fn, is_inverse, symbol='acos', _is_linear)
+    derivate_fn = lambda arg: Product(Constant(-1), (Power(Sum(Constant(1), Product(Constant(-1), Power(arg, Constant(2)))), Constant(-0.5))))
+    is_inverse = lambda x: isinstance(x, Cos)
+    symbol = "acos"
+    _is_linear: bool = False
+
+    def __call__(self, x):
+        return m.acos(self.argument(x))
+
+class Atan(Function):
+    derivate_fn = lambda arg: Power(Sum(Constant(1), Power(arg, Constant(2))), Constant(-1))
+    is_inverse = lambda x: isinstance(x, Tan)
+    symbol = "atan"
+    _is_linear: bool = False
+
+    def __call__(self, x):
+        return m.atan(self.argument(x))
