@@ -92,8 +92,8 @@ class Power(Expression):
 
     def derivate(self):
         f, g = self.base, self.factor
-        term1 = Product(self, Log(f), g.derivate())
-        term2 = Product(self, g, f.derivate(), Power(f, Constant(-1)))
+        term1 = Product(self.copy(), Log(f), g.derivate())
+        term2 = Product(self.copy(), g, f.derivate(), Power(f, Constant(-1)))
         return Sum(term1, term2).simplify()
 
     def simplify(self):
