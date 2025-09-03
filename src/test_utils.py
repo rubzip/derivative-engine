@@ -1,4 +1,4 @@
-from src.expressions.basic import Expression
+from expressions.base import Expression
 
 
 def evaluate_derivative(
@@ -7,7 +7,7 @@ def evaluate_derivative(
     values: list[float],
     tol: float = 1e-6,
 ):
-    derivative_exp = expresion.simplify().derivative().simplify()
+    derivative_exp = expresion.simplify().derivate().simplify()
     for x in values:
         actual = derivative_exp(x)
         expected = expected_derivative(x)
