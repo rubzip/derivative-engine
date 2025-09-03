@@ -1,79 +1,75 @@
-from abc import ABC, abstractmethod
-import math as m
 from collections import defaultdict
+import math as m
+from .core import Expression, Constant, Variable
 
 
-class Expression(ABC):
-    def __init__(self, precedence: int = None):
-        self.precedence = precedence
+class Power(Expression):
+    def __init__(self, base: Expression, factor: Expression):
+        super().__init__(precedence=3)
+        self.base = base
+        self.factor = factor
 
-    @abstractmethod
-    def derivate(self) -> "Expression": ...
+    def simplify(self):
+        base = self.base.simplify()
+        if base == Constant(0) or base == Constant(1):
+            return base
+        
+        factor = self.factor.simplify()
+        if factor == Constant(1):
+            return base
+        if factor == Constant(0):
+            return Constant(1)
+        
+        if isinstance(base, Power):
+            return Power(base.base, Product(base.factor, factor)).simplify()
+        
+        return Power(base, factor)
 
-    @abstractmethod
-    def simplify(self) -> "Expression": ...
-
-    @abstractmethod
-    def copy(self) -> "Expression": ...
-
-    @abstractmethod
-    def __call__(self, x: float) -> float: ...
-
-    @abstractmethod
-    def __str__(self): ...
-
-    @abstractmethod
-    def __hash__(self): ...
-
-    def _add_parentheses(self, child: "Expression") -> str:
-        if child.precedence > self.precedence:
-            return f"({child})"
-        return str(child)
-
-class Constant(Expression):
-    def __init__(self, value: float):
-        super().__init__(precedence=0)
-        self.value = value
-    
-    def derivate(self) -> "Constant":
-        return Constant(0)
-    
-    def simplify(self) -> "Constant":
-        return self
-    
-    def copy(self):
-        return Constant(self.value)
-
-    def __eq__(self, other: Expression) -> bool:
-        return isinstance(other, Constant) and (other.value == self.value)
+    def derivate(self):
+        f, g = self.base, self.factor
+        term1 = Product(self, Log(f), g.derivate())
+        term2 = Product(self, g, f.derivate(), Power(f, Constant(-1)))
+        return Sum(term1, term2).simplify()
     
     def __call__(self, x):
-        return self.value
-
+        return self.base(x) ** self.factor(x)
+    
     def __str__(self):
-        return str(self.value)
+        base_str = self._add_parentheses(self.base)
+        factor_str = self._add_parentheses(self.factor)
+        
+        return f"{base_str}^{factor_str}" 
 
-class Variable(Expression):
-    def __init__(self):
-        super().__init__(precedence=0)
-    
-    def derivate(self) -> Constant:
-        return Constant(1)
-    
-    def simplify(self) -> "Variable":
-        return self
-    
-    def copy(self):
-        return Variable()
-    
     def __eq__(self, other):
-        return isinstance(other, Variable) 
+        return isinstance(other, Power) and self.base == other.base and self.factor == other.factor
+
+    def __hash__(self):
+        return hash(("^", self.base, self.factor))
+
+class Log(Function):
+    derivate_fn = lambda arg: Power(arg, Constant(-1))
+    is_inverse = lambda arg: isinstance(arg, Exp)
+    symbol = "log"
+    _is_linear = False
+
+    def __init__(self, argument: Expression):
+        super().__init__(argument)
+    
+    def __call__(self, x):
+        return m.log(self.argument(x))
+
+class Exp(Function):
+    derivate_fn = lambda arg: Exp(arg)
+    is_inverse = lambda arg: isinstance(arg, Log)
+    symbol = "exp"
+    _is_linear = False
+
+    def __init__(self, argument: Expression):
+        super().__init__(argument)
 
     def __call__(self, x):
-        return x
-    
-    def __str__(self):
-        return "x"
+        return m.exp(self.argument(x))
+
 
 class Function(Expression):
     derivate_fn: callable = None
@@ -266,6 +262,3 @@ class Product(Operator):
             ]
             terms.append(Product(*deriv_args))
         return Sum(*terms).simplify()
-
-
-
