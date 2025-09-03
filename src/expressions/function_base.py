@@ -3,6 +3,7 @@ from .base import Expression
 
 
 class Function(Expression, ABC):
+    """Base class for mathematical (unary) functions."""
     symbol: str = ""
     _is_linear: bool = False
 
@@ -15,7 +16,7 @@ class Function(Expression, ABC):
         """Returns the derivative of the function with respect to its argument.
         This method should be overridden by subclasses to provide the specific derivative logic."""
         raise NotImplementedError()
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         """Checks if the given argument is the inverse of this function.

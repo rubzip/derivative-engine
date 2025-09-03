@@ -1,16 +1,19 @@
 import math as m
 from .base import Expression, Constant
-from .operators import Function, Power, Sum, Product
+from .operators import Sum, Product
+from .function_base import Function
+from .exponential import Power
 
 
 class Sinh(Function):
+    """Hyperbolic sine function."""
     symbol = "sinh"
     _is_linear: bool = False
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
         return Cosh(argument)
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         return isinstance(argument, Asinh)
@@ -20,13 +23,14 @@ class Sinh(Function):
 
 
 class Cosh(Function):
+    """Hyperbolic cosine function."""
     symbol = "cosh"
     _is_linear: bool = False
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
         return Sinh(argument)
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         return isinstance(argument, Acosh)
@@ -36,13 +40,14 @@ class Cosh(Function):
 
 
 class Tanh(Function):
+    """Hyperbolic tangent function."""
     symbol = "tanh"
     _is_linear: bool = False
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
         return Power(Cosh(argument), Constant(-2))
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         return isinstance(argument, Atanh)
@@ -52,13 +57,14 @@ class Tanh(Function):
 
 
 class Asinh(Function):
+    """Inverse hyperbolic sine function."""
     symbol = "asinh"
     _is_linear: bool = False
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
         return Power(Sum(Constant(1), Power(argument, Constant(2))), Constant(-0.5))
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         return isinstance(argument, Sinh)
@@ -68,13 +74,14 @@ class Asinh(Function):
 
 
 class Acosh(Function):
+    """Inverse hyperbolic cosine function."""
     symbol = "acosh"
     _is_linear: bool = False
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
         return Power(Sum(Power(argument, Constant(2)), Constant(-1)), Constant(-0.5))
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         return isinstance(argument, Cosh)
@@ -84,6 +91,7 @@ class Acosh(Function):
 
 
 class Atanh(Function):
+    """Inverse hyperbolic tangent function."""
     symbol = "atanh"
     _is_linear: bool = False
 

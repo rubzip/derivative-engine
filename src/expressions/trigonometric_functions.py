@@ -4,6 +4,7 @@ from .operators import Function, Power, Sum, Product
 
 
 class Sin(Function):
+    """Sine function."""
     symbol = "sin"
     _is_linear: bool = False
 
@@ -20,6 +21,7 @@ class Sin(Function):
 
 
 class Cos(Function):
+    """Cosine function."""
     symbol = "cos"
     _is_linear: bool = False
 
@@ -36,6 +38,7 @@ class Cos(Function):
 
 
 class Tan(Function):
+    """Tangent function."""
     symbol = "tan"
     _is_linear: bool = False
 
@@ -52,6 +55,7 @@ class Tan(Function):
 
 
 class Asin(Function):
+    """Inverse sine function."""
     symbol = "asin"
     _is_linear: bool = False
 
@@ -68,6 +72,7 @@ class Asin(Function):
 
 
 class Acos(Function):
+    """Inverse cosine function."""
     symbol = "acos"
     _is_linear: bool = False
     
@@ -92,6 +97,7 @@ class Acos(Function):
 
 
 class Atan(Function):
+    """Inverse tangent function."""
     symbol = "atan"
     _is_linear: bool = False
 

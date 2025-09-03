@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 
 class Expression(ABC):
+    """Interface for any mathematical expression."""
     def __init__(self, precedence: int = None):
         self.precedence = precedence
 
@@ -33,6 +34,7 @@ class Expression(ABC):
 
 
 class Constant(Expression):
+    """Represents a constant numerical value."""
     def __init__(self, value: float):
         super().__init__(precedence=0)
         self.value = value
@@ -60,6 +62,7 @@ class Constant(Expression):
 
 
 class Variable(Expression):
+    """Represents the variable 'x'."""
     def __init__(self):
         super().__init__(precedence=0)
 

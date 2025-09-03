@@ -5,6 +5,7 @@ from .operators import Sum, Product
 
 
 class Power(Expression):
+    """Represents exponentiation of one expression by another."""
     def __init__(self, base: Expression, factor: Expression):
         super().__init__(precedence=3)
         self.base = base
@@ -56,13 +57,14 @@ class Power(Expression):
 
 
 class Log(Function):
+    """Represents the natural logarithm of an expression."""
     symbol = "log"
     _is_linear = False
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
         return Power(argument, Constant(-1))
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         return isinstance(argument, Exp)
@@ -72,13 +74,14 @@ class Log(Function):
 
 
 class Exp(Function):
+    """Represents the exponential function e^x."""
     symbol = "exp"
     _is_linear = False
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
         return Exp(argument)
-    
+
     @staticmethod
     def is_inverse(argument: Expression) -> bool:
         return isinstance(argument, Log)

@@ -1,4 +1,3 @@
-import math as m
 from abc import ABC
 from collections import defaultdict
 
@@ -6,6 +5,7 @@ from .base import Expression, Constant
 
 
 class Operator(Expression, ABC):
+    """Base class for mathematical (n-ary) operators."""
     identity: Expression = None
     absorbent: Expression = None
     precedence: int = 3
@@ -47,13 +47,11 @@ class Operator(Expression, ABC):
 
 
 class Sum(Operator):
+    """Addition operator."""
     identity = Constant(0)
     absorbent = None
     precedence = 4
     symbol = "+"
-
-    def __init__(self, *arguments: Expression):
-        super().__init__(*arguments)
 
     def derivate(self) -> "Sum":
         return Sum(*(arg.derivate() for arg in self.arguments))
@@ -123,13 +121,11 @@ class Sum(Operator):
 
 
 class Product(Operator):
+    """Multiplication operator."""
     identity = Constant(1)
     absorbent = Constant(0)
     precedence = 2
     symbol = "*"
-
-    def __init__(self, *arguments: Expression):
-        super().__init__(*arguments)
 
     def derivate(self) -> Sum:
         terms = []

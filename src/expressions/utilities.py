@@ -5,6 +5,7 @@ from .function_base import Function
 
 
 class Division:
+    """Factoty method for Division operation."""
     def __new__(cls, dividend: Expression, divisor: Expression) -> Expression:
         if divisor == Constant(0):
             raise ZeroDivisionError("You can't divide by zero")
@@ -17,16 +18,21 @@ class Division:
 
 
 class Negation:
+    """Factory method for Negation operation."""
     def __new__(cls, argument: Expression) -> Expression:
         if isinstance(argument, Constant):
             return Constant(-argument.value)
         return Product(Constant(-1), argument)
 
+
 class Sqrt:
+    """Factory method for Square root operation."""
     def __new__(cls, argument: Expression) -> Expression:
         return Power(argument, Constant(0.5))
 
+
 class Abs(Function):
+    """Absolute value function."""
     symbol = "abs"
     _is_linear: bool = False
 
@@ -51,6 +57,7 @@ class Abs(Function):
 
 
 class Sign(Function):
+    """Sign function."""
     symbol = "sign"
     _is_linear: bool = False
 
