@@ -1,5 +1,7 @@
 from .base import Expression, Constant
-from .operators import Product, Power, Function
+from .operators import Product
+from .exponential import Power
+from .function_base import Function
 
 
 class Division:
@@ -20,6 +22,9 @@ class Negation:
             return Constant(-argument.value)
         return Product(Constant(-1), argument)
 
+class Sqrt:
+    def __new__(cls, argument: Expression) -> Expression:
+        return Power(argument, Constant(0.5))
 
 class Abs(Function):
     symbol = "abs"

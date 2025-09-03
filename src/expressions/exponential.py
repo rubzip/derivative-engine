@@ -77,7 +77,7 @@ class Exp(Function):
 
     @staticmethod
     def derivate_fn(argument: Expression) -> Expression:
-        return Exp(argument, Constant(-1))
+        return Exp(argument)
     
     @staticmethod
     def is_inverse(argument: Expression) -> bool:

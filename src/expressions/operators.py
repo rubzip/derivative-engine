@@ -5,48 +5,6 @@ from collections import defaultdict
 from .base import Expression, Constant
 
 
-class Function(Expression, ABC):
-    symbol: str = ""
-    _is_linear: bool = False
-
-    @staticmethod
-    def derivate_fn(argument: Expression) -> Expression:
-        raise NotImplementedError()
-    
-    @staticmethod
-    def is_inverse(argument: Expression) -> bool:
-        return False
-    
-    def __init__(self, argument: Expression):
-        super().__init__(precedence=4)
-        self.argument = argument
-
-    def derivate(self) -> "Product":
-        arg = self.argument
-        return Product(self.derivate_fn(arg), arg.derivate())
-
-    def simplify(self) -> Expression:
-        arg = self.argument.simplify()
-        if isinstance(arg, Function) and self.is_inverse is not None:
-            if self.is_inverse(arg):
-                return arg.argument
-        return self.__class__(argument=arg)
-
-    def copy(self) -> "Function":
-        return self.__class__(self.argument.copy())
-
-    def __eq__(self, other):
-        cls = self.__class__
-        return isinstance(other, cls) and self.argument == other.argument
-
-    def __str__(self):
-        arg = self._add_parentheses(self.argument)
-        return f"{self.symbol}{arg}"
-
-    def __hash__(self):
-        return hash((self.symbol, self.argument))
-
-
 class Operator(Expression, ABC):
     identity: Expression = None
     absorbent: Expression = None
@@ -86,89 +44,6 @@ class Operator(Expression, ABC):
 
     def _sort_args(self):
         self.arguments.sort(key=lambda a: (a.precedence, str(a)))
-
-
-class Power(Expression):
-    def __init__(self, base: Expression, factor: Expression):
-        super().__init__(precedence=3)
-        self.base = base
-        self.factor = factor
-
-    def derivate(self) -> Expression:
-        f, g = self.base, self.factor
-        term1 = Product(self.copy(), Log(f), g.derivate())
-        term2 = Product(self.copy(), g, f.derivate(), Power(f, Constant(-1)))
-        return Sum(term1, term2).simplify()
-
-    def simplify(self) -> Expression:
-        base = self.base.simplify()
-        if base == Constant(0) or base == Constant(1):
-            return base
-
-        factor = self.factor.simplify()
-        if factor == Constant(1):
-            return base
-        if factor == Constant(0):
-            return Constant(1)
-
-        if isinstance(base, Power):
-            return Power(base.base, Product(base.factor, factor)).simplify()
-
-        return Power(base, factor)
-
-    def copy(self) -> "Power":
-        return Power(self.base.copy(), self.factor.copy())
-
-    def __eq__(self, other) -> bool:
-        return (
-            isinstance(other, Power)
-            and self.base == other.base
-            and self.factor == other.factor
-        )
-
-    def __call__(self, x: float) -> float:
-        return self.base(x) ** self.factor(x)
-
-    def __str__(self):
-        base_str = self._add_parentheses(self.base)
-        factor_str = self._add_parentheses(self.factor)
-
-        return f"{base_str}^{factor_str}"
-
-    def __hash__(self):
-        return hash(("^", self.base, self.factor))
-
-
-class Log(Function):
-    symbol = "log"
-    _is_linear = False
-
-    @staticmethod
-    def derivate_fn(argument: Expression) -> Expression:
-        return Power(argument, Constant(-1))
-    
-    @staticmethod
-    def is_inverse(argument: Expression) -> bool:
-        return isinstance(argument, Exp)
-
-    def __call__(self, x: float) -> float:
-        return m.log(self.argument(x))
-
-
-class Exp(Function):
-    symbol = "exp"
-    _is_linear = False
-
-    @staticmethod
-    def derivate_fn(argument: Expression) -> Expression:
-        return Exp(argument, Constant(-1))
-    
-    @staticmethod
-    def is_inverse(argument: Expression) -> bool:
-        return isinstance(argument, Log)
-
-    def __call__(self, x: float) -> float:
-        return m.exp(self.argument(x))
 
 
 class Sum(Operator):
