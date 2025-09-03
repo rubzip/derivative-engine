@@ -16,25 +16,22 @@ class Function(Expression, ABC):
 
     def derivate(self):
         arg = self.argument
-        return Product(
-            self.derivate_fn(arg),
-            arg.derivate()
-        )
-    
+        return Product(self.derivate_fn(arg), arg.derivate())
+
     def simplify(self):
         arg = self.argument.simplify()
         if isinstance(arg, Function) and self.is_inverse is not None:
             if self.is_inverse(arg):
                 return arg.argument
         return self.__class__(argument=arg)
-    
+
     def copy(self):
         return self.__class__(self.argument.copy())
-    
+
     def __eq__(self, other):
         cls_ = type(self)
         return isinstance(other, cls_) and self.argument == other.argument
-    
+
     def __str__(self):
         arg = self._add_parentheses(self.argument)
         return f"{self.symbol}{arg}"
@@ -47,7 +44,7 @@ class Operator(Expression, ABC):
     identity: Expression = None
     absorbant: Expression = None
     precedence: int = 3
-    symbol: str = ''
+    symbol: str = ""
 
     def __init__(self, *arguments: Expression):
         super().__init__(precedence=self.precedence)
@@ -55,7 +52,7 @@ class Operator(Expression, ABC):
             raise ValueError("Operator needs at least one argument")
         self.arguments = self._simplify_args(arguments)
         self._sort_args()
-    
+
     def copy(self):
         return self.__class__(*(arg.copy() for arg in self.arguments))
 
@@ -79,7 +76,7 @@ class Operator(Expression, ABC):
         if self.absorbant and any(arg == self.absorbant for arg in args):
             return [self.absorbant]
         return [arg.simplify() for arg in args if arg != self.identity]
-    
+
     def _sort_args(self):
         self.arguments.sort(key=lambda a: (a.precedence, str(a)))
 
@@ -100,35 +97,40 @@ class Power(Expression):
         base = self.base.simplify()
         if base == Constant(0) or base == Constant(1):
             return base
-        
+
         factor = self.factor.simplify()
         if factor == Constant(1):
             return base
         if factor == Constant(0):
             return Constant(1)
-        
+
         if isinstance(base, Power):
             return Power(base.base, Product(base.factor, factor)).simplify()
-        
+
         return Power(base, factor)
-    
+
     def copy(self):
         return Power(self.base.copy(), self.factor.copy())
 
     def __eq__(self, other):
-        return isinstance(other, Power) and self.base == other.base and self.factor == other.factor
-    
+        return (
+            isinstance(other, Power)
+            and self.base == other.base
+            and self.factor == other.factor
+        )
+
     def __call__(self, x):
         return self.base(x) ** self.factor(x)
-    
+
     def __str__(self):
         base_str = self._add_parentheses(self.base)
         factor_str = self._add_parentheses(self.factor)
-        
-        return f"{base_str}^{factor_str}" 
+
+        return f"{base_str}^{factor_str}"
 
     def __hash__(self):
         return hash(("^", self.base, self.factor))
+
 
 class Log(Function):
     derivate_fn = lambda arg: Power(arg, Constant(-1))
@@ -138,9 +140,10 @@ class Log(Function):
 
     def __init__(self, argument: Expression):
         super().__init__(argument)
-    
+
     def __call__(self, x):
         return m.log(self.argument(x))
+
 
 class Exp(Function):
     derivate_fn = lambda arg: Exp(arg)
@@ -154,6 +157,7 @@ class Exp(Function):
     def __call__(self, x):
         return m.exp(self.argument(x))
 
+
 class Sum(Operator):
     identity = Constant(0)
     absorbant = None
@@ -162,6 +166,9 @@ class Sum(Operator):
 
     def __init__(self, *arguments: Expression):
         super().__init__(*arguments)
+
+    def derivate(self) -> Expression:
+        return Sum(*(arg.derivate() for arg in self.arguments))
 
     def simplify(self) -> Expression:
         flat_args = []
@@ -179,7 +186,7 @@ class Sum(Operator):
             flat_args.append(Constant(constant_sum))
 
         if not flat_args:
-            return Constant(0)  
+            return Constant(0)
 
         if len(flat_args) == 1:
             return flat_args[0]
@@ -193,15 +200,23 @@ class Sum(Operator):
 
         for arg in self.arguments:
             if isinstance(arg, Product):
-                non_constants = [a for a in arg.arguments if not isinstance(a, Constant)]
+                non_constants = [
+                    a for a in arg.arguments if not isinstance(a, Constant)
+                ]
                 key = tuple(non_constants)
                 coeff = 1
                 for a in arg.arguments:
                     if isinstance(a, Constant):
                         coeff *= a.value
-                groups[key] = Constant(groups[key].value + coeff) if key in groups else Constant(coeff)
+                groups[key] = (
+                    Constant(groups[key].value + coeff)
+                    if key in groups
+                    else Constant(coeff)
+                )
             elif isinstance(arg, Constant):
-                groups[()] = Constant(groups[()].value + arg.value) if () in groups else arg
+                groups[()] = (
+                    Constant(groups[()].value + arg.value) if () in groups else arg
+                )
             else:
                 groups[(arg,)] = Constant(1) + groups.get((arg,), Constant(0))
 
@@ -218,8 +233,6 @@ class Sum(Operator):
     def __call__(self, x: float) -> float:
         return sum(arg(x) for arg in self.arguments)
 
-    def derivate(self) -> Expression:
-        return Sum(*(arg.derivate() for arg in self.arguments))
 
 class Product(Operator):
     identity = Constant(1)
@@ -229,6 +242,13 @@ class Product(Operator):
 
     def __init__(self, *arguments: Expression):
         super().__init__(*arguments)
+
+    def derivate(self) -> Expression:
+        terms = []
+        for i, _ in enumerate(self.arguments):
+            term = [a if j != i else a.derivate() for j, a in enumerate(self.arguments)]
+            terms.append(Product(*term))
+        return Sum(*terms).simplify()
 
     def simplify(self) -> Expression:
         flat_args = []
@@ -247,7 +267,7 @@ class Product(Operator):
 
         if not flat_args:
             return Constant(1)
-        
+
         if constant_prod != 1:
             flat_args.append(Constant(constant_prod))
 
@@ -263,13 +283,3 @@ class Product(Operator):
         for arg in self.arguments:
             result *= arg(x)
         return result
-
-    def derivate(self) -> Expression:
-        terms = []
-        for i, _ in enumerate(self.arguments):
-            term = [
-                a if j != i else a.derivate()
-                for j, a in enumerate(self.arguments)
-            ]
-            terms.append(Product(*term))
-        return Sum(*terms).simplify()

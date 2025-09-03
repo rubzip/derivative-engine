@@ -34,7 +34,9 @@ class Tanh(Function):
 
 
 class Asinh(Function):
-    derivate_fn = lambda arg: Power(Sum(Constant(1), Power(arg, Constant(2))), Constant(-0.5))
+    derivate_fn = lambda arg: Power(
+        Sum(Constant(1), Power(arg, Constant(2))), Constant(-0.5)
+    )
     is_inverse = lambda x: isinstance(x, Sinh)
     symbol = "asinh"
     _is_linear: bool = False
@@ -44,7 +46,9 @@ class Asinh(Function):
 
 
 class Acosh(Function):
-    derivate_fn = lambda arg: Power(Sum(Power(arg, Constant(2)), Constant(-1)), Constant(-0.5))
+    derivate_fn = lambda arg: Power(
+        Sum(Power(arg, Constant(2)), Constant(-1)), Constant(-0.5)
+    )
     is_inverse = lambda x: isinstance(x, Cosh)
     symbol = "acosh"
     _is_linear: bool = False
@@ -54,7 +58,9 @@ class Acosh(Function):
 
 
 class Atanh(Function):
-    derivate_fn = lambda arg: Power(Sum(Constant(1), Product(Constant(-1), Power(arg, Constant(2)))), Constant(-1))
+    derivate_fn = lambda arg: Power(
+        Sum(Constant(1), Product(Constant(-1), Power(arg, Constant(2)))), Constant(-1)
+    )
     is_inverse = lambda x: isinstance(x, Tanh)
     symbol = "atanh"
     _is_linear: bool = False
