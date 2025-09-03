@@ -16,6 +16,9 @@ class Expression(ABC):
     def copy(self) -> "Expression": ...
 
     @abstractmethod
+    def __eq__(self, other: "Expression") -> bool: ...
+    
+    @abstractmethod
     def __call__(self, x: float) -> float: ...
 
     @abstractmethod
