@@ -29,8 +29,8 @@ class Function(Expression, ABC):
         return self.__class__(self.argument.copy())
 
     def __eq__(self, other):
-        cls_ = type(self)
-        return isinstance(other, cls_) and self.argument == other.argument
+        cls = self.__class__
+        return isinstance(other, cls) and self.argument == other.argument
 
     def __str__(self):
         arg = self._add_parentheses(self.argument)
@@ -57,8 +57,8 @@ class Operator(Expression, ABC):
         return self.__class__(*(arg.copy() for arg in self.arguments))
 
     def __eq__(self, other):
-        cls_ = type(self)
-        if not isinstance(other, cls_):
+        cls = self.__class__
+        if not isinstance(other, cls):
             return False
         if len(self.arguments) != len(other.arguments):
             return False
