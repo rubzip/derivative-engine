@@ -1,4 +1,5 @@
-from .core import Expression, Constant, Product, Power, Function
+from .core import Expression, Constant
+from .expressions import Product, Power, Function
 
 class Division:
     def __new__(cls, dividend: Expression, divisor: Expression) -> Expression:

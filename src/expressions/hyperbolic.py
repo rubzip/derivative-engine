@@ -1,5 +1,6 @@
 import math as m
-from .core import Expression, Function, Constant, Power, Sum, Product
+from .core import Constant
+from .expressions import Function, Power, Sum, Product
 
 
 class Sinh(Function):

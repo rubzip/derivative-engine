@@ -1,6 +1,6 @@
 import math as m
-from .core import Expression, Function, Constant, Power, Sum, Product
-
+from .core import Constant
+from .expressions import Function, Power, Sum, Product
 
 class Sin(Function):
     derivate_fn = lambda arg: Cos(arg)
