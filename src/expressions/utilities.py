@@ -22,10 +22,16 @@ class Negation:
 
 
 class Abs(Function):
-    derivate_fn = lambda arg: Sign(arg)
-    is_inverse = lambda x: False
     symbol = "abs"
     _is_linear: bool = False
+
+    @staticmethod
+    def derivate_fn(argument: Expression) -> Expression:
+        return Sign(argument)
+    
+    @staticmethod
+    def is_inverse(argument: Expression) -> bool:
+        return False
 
     def __call__(self, x):
         return abs(self.argument(x))
@@ -40,11 +46,17 @@ class Abs(Function):
 
 
 class Sign(Function):
-    derivate_fn = lambda arg: Constant(0)
-    is_inverse = lambda x: False
     symbol = "sign"
     _is_linear: bool = False
 
+    @staticmethod
+    def derivate_fn(argument: Expression) -> Expression:
+        return Constant(0)
+    
+    @staticmethod
+    def is_inverse(argument: Expression) -> bool:
+        return False
+    
     def __call__(self, x):
         val = self.argument(x)
         return 1 if val > 0 else -1 if val < 0 else 0

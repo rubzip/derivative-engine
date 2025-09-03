@@ -6,11 +6,17 @@ from .base import Expression, Constant
 
 
 class Function(Expression, ABC):
-    derivate_fn: callable = None
-    is_inverse: callable = None
     symbol: str = ""
     _is_linear: bool = False
 
+    @staticmethod
+    def derivate_fn(argument: Expression) -> Expression:
+        raise NotImplementedError()
+    
+    @staticmethod
+    def is_inverse(argument: Expression) -> bool:
+        return False
+    
     def __init__(self, argument: Expression):
         super().__init__(precedence=4)
         self.argument = argument
@@ -134,26 +140,32 @@ class Power(Expression):
 
 
 class Log(Function):
-    derivate_fn = lambda arg: Power(arg, Constant(-1))
-    is_inverse = lambda arg: isinstance(arg, Exp)
     symbol = "log"
     _is_linear = False
 
-    def __init__(self, argument: Expression):
-        super().__init__(argument)
+    @staticmethod
+    def derivate_fn(argument: Expression) -> Expression:
+        return Power(argument, Constant(-1))
+    
+    @staticmethod
+    def is_inverse(argument: Expression) -> bool:
+        return isinstance(argument, Exp)
 
     def __call__(self, x: float) -> float:
         return m.log(self.argument(x))
 
 
 class Exp(Function):
-    derivate_fn = lambda arg: Exp(arg)
-    is_inverse = lambda arg: isinstance(arg, Log)
     symbol = "exp"
     _is_linear = False
 
-    def __init__(self, argument: Expression):
-        super().__init__(argument)
+    @staticmethod
+    def derivate_fn(argument: Expression) -> Expression:
+        return Exp(argument, Constant(-1))
+    
+    @staticmethod
+    def is_inverse(argument: Expression) -> bool:
+        return isinstance(argument, Log)
 
     def __call__(self, x: float) -> float:
         return m.exp(self.argument(x))
