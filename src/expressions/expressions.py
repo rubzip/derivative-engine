@@ -41,6 +41,47 @@ class Function(Expression, ABC):
         return hash((self.symbol, self.argument))
 
 
+class Operator(Expression, ABC):
+    identity: Expression = None
+    absorbent: Expression = None
+    precedence: int = 3
+    symbol: str = ""
+
+    def __init__(self, *arguments: Expression):
+        super().__init__(precedence=self.precedence)
+        if not arguments:
+            raise ValueError("Operator needs at least one argument")
+        self.arguments = self._simplify_args(arguments)
+        self._sort_args()
+
+    def copy(self):
+        return self.__class__(*(arg.copy() for arg in self.arguments))
+
+    def __eq__(self, other):
+        cls = self.__class__
+        if not isinstance(other, cls):
+            return False
+        if len(self.arguments) != len(other.arguments):
+            return False
+        self._sort_args()
+        other._sort_args()
+        return all(a == b for a, b in zip(self.arguments, other.arguments))
+
+    def __str__(self):
+        return f" {self.symbol} ".join(self._add_parentheses(a) for a in self.arguments)
+
+    def __hash__(self):
+        return hash((self.symbol, tuple(self.arguments)))
+
+    def _simplify_args(self, args: list[Expression]) -> list[Expression]:
+        if self.absorbent and any(arg == self.absorbent for arg in args):
+            return [self.absorbent]
+        return [arg.simplify() for arg in args if arg != self.identity]
+
+    def _sort_args(self):
+        self.arguments.sort(key=lambda a: (a.precedence, str(a)))
+
+
 class Power(Expression):
     def __init__(self, base: Expression, factor: Expression):
         super().__init__(precedence=3)
