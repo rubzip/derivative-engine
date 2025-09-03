@@ -1,6 +1,87 @@
 from collections import defaultdict
 import math as m
-from .core import Expression, Constant, Variable
+from abc import ABC
+from .core import Expression, Constant
+
+
+class Function(Expression, ABC):
+    derivate_fn: callable = None
+    is_inverse: callable = None
+    symbol: str = ""
+    _is_linear: bool = False
+
+    def __init__(self, argument: Expression):
+        super().__init__(precedence=4)
+        self.argument = argument
+
+    def derivate(self):
+        arg = self.argument
+        return Product(
+            self.derivate_fn(arg),
+            arg.derivate()
+        )
+    
+    def simplify(self):
+        arg = self.argument.simplify()
+        if isinstance(arg, Function) and self.is_inverse is not None:
+            if self.is_inverse(arg):
+                return arg.argument
+        return self.__class__(argument=arg)
+    
+    def copy(self):
+        return self.__class__(self.argument.copy())
+    
+    def __eq__(self, other):
+        cls_ = type(self)
+        return isinstance(other, cls_) and self.argument == other.argument
+    
+    def __str__(self):
+        arg = self._add_parentheses(self.argument)
+        return f"{self.symbol}{arg}"
+
+    def __hash__(self):
+        return hash((self.symbol, self.argument))
+
+
+class Operator(Expression, ABC):
+    identity: Expression = None
+    absorbant: Expression = None
+    precedence: int = 3
+    symbol: str = ''
+
+    def __init__(self, *arguments: Expression):
+        super().__init__(precedence=self.precedence)
+        if not arguments:
+            raise ValueError("Operator needs at least one argument")
+        self.arguments = self._simplify_args(arguments)
+        self._sort_args()
+    
+    def copy(self):
+        return self.__class__(*self.arguments)
+
+    def __eq__(self, other):
+        cls_ = type(self)
+        if not isinstance(other, cls_):
+            return False
+        if len(self.arguments) != len(other.arguments):
+            return False
+        self._sort_args()
+        other._sort_args()
+        return all(a == b for a, b in zip(self.arguments, other.arguments))
+
+    def __str__(self):
+        return f" {self.symbol} ".join(self._add_parentheses(a) for a in self.arguments)
+
+    def __hash__(self):
+        return hash((self.symbol, tuple(self.arguments)))
+
+    def _simplify_args(self, args: list[Expression]) -> list[Expression]:
+        if self.absorbant and any(arg == self.absorbant for arg in args):
+            return [self.absorbant]
+        return [arg.simplify() for arg in args if arg != self.identity]
+    
+    def _sort_args(self):
+        self.arguments.sort(key=lambda a: (a.precedence, str(a)))
 
 
 class Power(Expression):
@@ -8,6 +89,12 @@ class Power(Expression):
         super().__init__(precedence=3)
         self.base = base
         self.factor = factor
+
+    def derivate(self):
+        f, g = self.base, self.factor
+        term1 = Product(self, Log(f), g.derivate())
+        term2 = Product(self, g, f.derivate(), Power(f, Constant(-1)))
+        return Sum(term1, term2).simplify()
 
     def simplify(self):
         base = self.base.simplify()
@@ -24,12 +111,12 @@ class Power(Expression):
             return Power(base.base, Product(base.factor, factor)).simplify()
         
         return Power(base, factor)
+    
+    def copy(self):
+        return Power(self.base.copy(), self.factor.copy())
 
-    def derivate(self):
-        f, g = self.base, self.factor
-        term1 = Product(self, Log(f), g.derivate())
-        term2 = Product(self, g, f.derivate(), Power(f, Constant(-1)))
-        return Sum(term1, term2).simplify()
+    def __eq__(self, other):
+        return isinstance(other, Power) and self.base == other.base and self.factor == other.factor
     
     def __call__(self, x):
         return self.base(x) ** self.factor(x)
@@ -39,9 +126,6 @@ class Power(Expression):
         factor_str = self._add_parentheses(self.factor)
         
         return f"{base_str}^{factor_str}" 
-
-    def __eq__(self, other):
-        return isinstance(other, Power) and self.base == other.base and self.factor == other.factor
 
     def __hash__(self):
         return hash(("^", self.base, self.factor))
@@ -70,83 +154,10 @@ class Exp(Function):
     def __call__(self, x):
         return m.exp(self.argument(x))
 
-
-class Function(Expression):
-    derivate_fn: callable = None
-    is_inverse: callable = None
-    symbol: str = ""
-    _is_linear: bool = False
-
-    def __init__(self, argument: Expression):
-        super().__init__(precedence=4)
-        self.argument = argument
-    
-    def simplify(self):
-        arg = self.argument.simplify()
-        if isinstance(arg, Function) and self.is_inverse is not None:
-            if self.is_inverse(arg):
-                return arg.argument
-        return self.__class__(argument=arg)
-
-    def derivate(self):
-        arg = self.argument
-        return Product(
-            self.derivate_fn(arg),
-            arg.derivate()
-        )
-    
-    def copy(self):
-        return self.__class__(self.argument.copy())
-    
-    def __str__(self):
-        arg = self._add_parentheses(self.argument)
-        return f"{self.symbol}{arg}"
-    
-    def __eq__(self, other):
-        cls_ = type(self)
-        return isinstance(other, cls_) and self.argument == other.argument
-
-    def __hash__(self):
-        return hash((self.symbol, self.argument))
-
-class Operator(Expression):
-    identity: Expression = None
-    absorbant: Expression = None
-    precedence: int = 3
-    symbol: str = ''
-
-    def __init__(self, *arguments: Expression):
-        super().__init__(precedence=self.precedence)
-        if not arguments:
-            raise ValueError("Operator needs at least one argument")
-        self.arguments = self._simplify_args(arguments)
-        self._sort_args()
-
-    def _simplify_args(self, args: list[Expression]) -> list[Expression]:
-        if self.absorbant and any(arg == self.absorbant for arg in args):
-            return [self.absorbant]
-        return [arg.simplify() for arg in args if arg != self.identity]
-    
-    def copy(self):
-        return self.__class__(*self.arguments)
-
-    def _sort_args(self):
-        self.arguments.sort(key=lambda a: (a.precedence, str(a)))
-
-    def __str__(self):
-        return f" {self.symbol} ".join(self._add_parentheses(a) for a in self.arguments)
-
-    def __hash__(self):
-        return hash((self.symbol, tuple(self.arguments)))
-    
-    def __eq__(self, other):
-        self._sort_args()
-        
-
 class Sum(Operator):
     identity = Constant(0)
     absorbant = None
-    precedence = 1
+    precedence = 4
     symbol = "+"
 
     def __init__(self, *arguments: Expression):
@@ -256,9 +267,9 @@ class Product(Operator):
     def derivate(self) -> Expression:
         terms = []
         for i, _ in enumerate(self.arguments):
-            deriv_args = [
+            term = [
                 a if j != i else a.derivate()
                 for j, a in enumerate(self.arguments)
             ]
-            terms.append(Product(*deriv_args))
+            terms.append(Product(*term))
         return Sum(*terms).simplify()

@@ -43,3 +43,11 @@ class Sign(Function):
     def __call__(self, x):
         val = self.argument(x)
         return 1 if val > 0 else -1 if val < 0 else 0
+    
+    def simplify(self):
+        arg = self.argument.simplify()
+        if isinstance(arg, Constant):
+            return Constant(1 if arg.value > 0 else -1 if arg.value < 0 else 0)
+        if isinstance(arg, Sign):
+            return arg
+        return Sign(argument=arg)
