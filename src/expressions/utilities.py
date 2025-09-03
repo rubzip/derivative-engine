@@ -1,5 +1,5 @@
-from .core import Expression, Constant
-from .expressions import Product, Power, Function
+from .base import Expression, Constant
+from .operators import Product, Power, Function
 
 
 class Division:

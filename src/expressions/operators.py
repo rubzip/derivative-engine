@@ -2,7 +2,7 @@ import math as m
 from abc import ABC
 from collections import defaultdict
 
-from .core import Expression, Constant, Operator
+from .base import Expression, Constant
 
 
 class Function(Expression, ABC):

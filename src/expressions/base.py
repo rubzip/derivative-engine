@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import math as m
 
 
 class Expression(ABC):
