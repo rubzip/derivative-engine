@@ -57,7 +57,7 @@ class Operator(Expression, ABC):
         self._sort_args()
     
     def copy(self):
-        return self.__class__(*self.arguments)
+        return self.__class__(*(arg.copy() for arg in self.arguments))
 
     def __eq__(self, other):
         cls_ = type(self)
