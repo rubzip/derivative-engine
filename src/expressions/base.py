@@ -43,13 +43,13 @@ class Constant(Expression):
     def simplify(self) -> "Constant":
         return self
 
-    def copy(self):
+    def copy(self) -> "Constant":
         return Constant(self.value)
 
     def __eq__(self, other: Expression) -> bool:
         return isinstance(other, Constant) and (other.value == self.value)
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return self.value
 
     def __str__(self):
@@ -69,13 +69,13 @@ class Variable(Expression):
     def simplify(self) -> "Variable":
         return self
 
-    def copy(self):
+    def copy(self) -> "Variable":
         return Variable()
 
     def __eq__(self, other):
         return isinstance(other, Variable)
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return x
 
     def __str__(self):

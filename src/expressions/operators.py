@@ -15,18 +15,18 @@ class Function(Expression, ABC):
         super().__init__(precedence=4)
         self.argument = argument
 
-    def derivate(self):
+    def derivate(self) -> "Product":
         arg = self.argument
         return Product(self.derivate_fn(arg), arg.derivate())
 
-    def simplify(self):
+    def simplify(self) -> Expression:
         arg = self.argument.simplify()
         if isinstance(arg, Function) and self.is_inverse is not None:
             if self.is_inverse(arg):
                 return arg.argument
         return self.__class__(argument=arg)
 
-    def copy(self):
+    def copy(self) -> "Function":
         return self.__class__(self.argument.copy())
 
     def __eq__(self, other):
@@ -54,7 +54,7 @@ class Operator(Expression, ABC):
         self.arguments = self._simplify_args(arguments)
         self._sort_args()
 
-    def copy(self):
+    def copy(self) -> "Operator":
         return self.__class__(*(arg.copy() for arg in self.arguments))
 
     def __eq__(self, other):
@@ -67,7 +67,7 @@ class Operator(Expression, ABC):
         other._sort_args()
         return all(a == b for a, b in zip(self.arguments, other.arguments))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f" {self.symbol} ".join(self._add_parentheses(a) for a in self.arguments)
 
     def __hash__(self):
@@ -88,13 +88,13 @@ class Power(Expression):
         self.base = base
         self.factor = factor
 
-    def derivate(self):
+    def derivate(self) -> Expression:
         f, g = self.base, self.factor
         term1 = Product(self.copy(), Log(f), g.derivate())
         term2 = Product(self.copy(), g, f.derivate(), Power(f, Constant(-1)))
         return Sum(term1, term2).simplify()
 
-    def simplify(self):
+    def simplify(self) -> Expression:
         base = self.base.simplify()
         if base == Constant(0) or base == Constant(1):
             return base
@@ -110,17 +110,17 @@ class Power(Expression):
 
         return Power(base, factor)
 
-    def copy(self):
+    def copy(self) -> "Power":
         return Power(self.base.copy(), self.factor.copy())
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             isinstance(other, Power)
             and self.base == other.base
             and self.factor == other.factor
         )
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return self.base(x) ** self.factor(x)
 
     def __str__(self):
@@ -142,7 +142,7 @@ class Log(Function):
     def __init__(self, argument: Expression):
         super().__init__(argument)
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.log(self.argument(x))
 
 
@@ -155,7 +155,7 @@ class Exp(Function):
     def __init__(self, argument: Expression):
         super().__init__(argument)
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.exp(self.argument(x))
 
 
@@ -168,7 +168,7 @@ class Sum(Operator):
     def __init__(self, *arguments: Expression):
         super().__init__(*arguments)
 
-    def derivate(self) -> Expression:
+    def derivate(self) -> "Sum":
         return Sum(*(arg.derivate() for arg in self.arguments))
 
     def simplify(self) -> Expression:
@@ -244,7 +244,7 @@ class Product(Operator):
     def __init__(self, *arguments: Expression):
         super().__init__(*arguments)
 
-    def derivate(self) -> Expression:
+    def derivate(self) -> Sum:
         terms = []
         for i, _ in enumerate(self.arguments):
             term = [a if j != i else a.derivate() for j, a in enumerate(self.arguments)]

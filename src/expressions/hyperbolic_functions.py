@@ -9,7 +9,7 @@ class Sinh(Function):
     symbol = "sinh"
     _is_linear: bool = False
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.sinh(self.argument(x))
 
 
@@ -19,7 +19,7 @@ class Cosh(Function):
     symbol = "cosh"
     _is_linear: bool = False
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.cosh(self.argument(x))
 
 
@@ -29,7 +29,7 @@ class Tanh(Function):
     symbol = "tanh"
     _is_linear: bool = False
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.tanh(self.argument(x))
 
 
@@ -41,7 +41,7 @@ class Asinh(Function):
     symbol = "asinh"
     _is_linear: bool = False
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.asinh(self.argument(x))
 
 
@@ -53,7 +53,7 @@ class Acosh(Function):
     symbol = "acosh"
     _is_linear: bool = False
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.acosh(self.argument(x))
 
 
@@ -65,5 +65,5 @@ class Atanh(Function):
     symbol = "atanh"
     _is_linear: bool = False
 
-    def __call__(self, x):
+    def __call__(self, x: float) -> float:
         return m.atanh(self.argument(x))
