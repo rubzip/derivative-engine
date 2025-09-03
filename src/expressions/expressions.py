@@ -42,7 +42,7 @@ class Function(Expression, ABC):
 
 class Operator(Expression, ABC):
     identity: Expression = None
-    absorbant: Expression = None
+    absorbent: Expression = None
     precedence: int = 3
     symbol: str = ""
 
@@ -73,8 +73,8 @@ class Operator(Expression, ABC):
         return hash((self.symbol, tuple(self.arguments)))
 
     def _simplify_args(self, args: list[Expression]) -> list[Expression]:
-        if self.absorbant and any(arg == self.absorbant for arg in args):
-            return [self.absorbant]
+        if self.absorbent and any(arg == self.absorbent for arg in args):
+            return [self.absorbent]
         return [arg.simplify() for arg in args if arg != self.identity]
 
     def _sort_args(self):
@@ -160,7 +160,7 @@ class Exp(Function):
 
 class Sum(Operator):
     identity = Constant(0)
-    absorbant = None
+    absorbent = None
     precedence = 4
     symbol = "+"
 
