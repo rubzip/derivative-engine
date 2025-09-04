@@ -1,7 +1,8 @@
 import math as m
+
 from .base import Expression, Constant
-from .operators import Sum, Product
 from .function_base import Function
+from .operators import Sum, Product
 from .exponential import Power
 
 

@@ -1,7 +1,7 @@
 from .base import Expression, Constant
+from .function_base import Function
 from .operators import Product
 from .exponential import Power
-from .function_base import Function
 
 
 class Division:

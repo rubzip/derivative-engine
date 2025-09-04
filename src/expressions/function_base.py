@@ -24,21 +24,21 @@ class Function(Expression, ABC):
         return False
 
     def derivate(self) -> Expression:
+        """Calculates the derivative of the function using the chain rule."""
         from .operators import Product
         arg = self.argument
         return Product(self.derivate_fn(arg), arg.derivate())
 
     def simplify(self) -> Expression:
         arg = self.argument.simplify()
-        if isinstance(arg, Function) and self.is_inverse is not None:
-            if self.is_inverse(arg):
-                return arg.argument
+        if isinstance(arg, Function) and self.is_inverse(arg):
+            return arg.argument
         return self.__class__(argument=arg)
 
     def copy(self) -> "Function":
         return self.__class__(self.argument.copy())
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         cls = self.__class__
         return isinstance(other, cls) and self.argument == other.argument
 

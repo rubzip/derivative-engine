@@ -60,13 +60,14 @@ class Sum(Operator):
         flat_args = []
         constant_sum = 0
 
-        for arg in self.arguments:
+        args = self._simplify_args(self.arguments)
+        for arg in args:
             if isinstance(arg, Sum):
-                flat_args.extend([a.simplify() for a in arg.arguments])
+                flat_args.extend(arg.arguments)
             elif isinstance(arg, Constant):
                 constant_sum += arg.value
             else:
-                flat_args.append(arg.simplify())
+                flat_args.append(arg)
 
         if constant_sum != 0:
             flat_args.append(Constant(constant_sum))
@@ -127,7 +128,7 @@ class Product(Operator):
     precedence = 2
     symbol = "*"
 
-    def derivate(self) -> Sum:
+    def derivate(self) -> Expression:
         terms = []
         for i, _ in enumerate(self.arguments):
             term = [a if j != i else a.derivate() for j, a in enumerate(self.arguments)]
@@ -138,13 +139,14 @@ class Product(Operator):
         flat_args = []
         constant_prod = 1
 
-        for arg in self.arguments:
+        args = self._simplify_args(self.arguments)
+        for arg in args:
             if isinstance(arg, Product):
-                flat_args.extend([a.simplify() for a in arg.arguments])
+                flat_args.extend(arg.arguments)
             elif isinstance(arg, Constant):
                 constant_prod *= arg.value
             else:
-                flat_args.append(arg.simplify())
+                flat_args.append(arg)
 
         if constant_prod == 0:
             return Constant(0)
@@ -163,7 +165,18 @@ class Product(Operator):
         return prod
 
     def __call__(self, x: float) -> float:
-        result = 1
+        result = 1.
         for arg in self.arguments:
             result *= arg(x)
         return result
+    
+    @staticmethod
+    def as_factors(*arguments: Expression) -> list[Expression]:
+        from .exponential import Power
+        factors = []
+        for arg in arguments:
+            if isinstance(arg, Power):
+                factors.append((arg.base, arg.factor))
+            else:
+                factors.append(arg, Constant(1))
+        return factors

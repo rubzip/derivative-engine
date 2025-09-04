@@ -1,4 +1,5 @@
 import math as m
+
 from .base import Expression, Constant
 from .function_base import Function
 from .operators import Sum, Product
@@ -27,6 +28,9 @@ class Power(Expression):
             return base
         if factor == Constant(0):
             return Constant(1)
+        
+        if isinstance(base, Constant) and isinstance(factor, Constant):
+            return Constant(base.value ** factor.value)
 
         if isinstance(base, Power):
             return Power(base.base, Product(base.factor, factor)).simplify()
